@@ -209,7 +209,7 @@ const fetchPaillierPublicKey = async () => {
         },
         body: JSON.stringify({ 
           voteData, 
-          publicKey: { n: paillierPublicKey.n.toString() }, // Send `publicKey` as an object
+          publicKey,
           digitalSignature 
         }),
       });

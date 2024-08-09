@@ -240,7 +240,7 @@ def handle_new_election(request):
             # Retrieve the election ID
             election_id = new_election.id
 
-            # Initialize the tally for each candidate in this election
+            # Initialize the tally for each candidate and for each topic in the election
             initialize_tally(election_id, candidates, topics)
             
             # Add voters to ElectionVoterStatus
@@ -344,26 +344,28 @@ def handle_Vote(request):
         try:
             data = json.loads(request.body.decode('utf-8'))
             vote_str = data.get('voteData')  # Encrypted vote data as string
-            public_key_data = data.get('publicKey')  # Paillier Public key data
+            rsa_public_key_data = data.get('publicKey')  # RSA Public key data
             signature = data.get('digitalSignature')
 
             # For demonstration purposes, just print the received data
             print("Vote Data:", vote_str)
             print("Signature:", signature)
-            print("Public Key:", public_key_data)
-            print("Type of Public Key Data:", type(public_key_data))
+            print("Public Key:", rsa_public_key_data)
+            print("Type of RSA Public Key Data:", type(rsa_public_key_data))
             
-            if isinstance(public_key_data, str):
-                return JsonResponse({'status': 'error', 'message': 'Public key data is not in the correct format'}, status=400)
+            
+            #verify the signature
+            is_signature_valid = verify_signature_with_public_key(vote_str, signature, rsa_public_key_data)
 
-            # Reconstruct the paillier public key
-            n = int(public_key_data['n'])
-            public_key = paillier.PaillierPublicKey(n)
-
+            if not is_signature_valid:
+                return JsonResponse({'status': 'error', 'message': 'Invalid digital signature'}, status=400)
+            else:
+                print('digital signature has been verified\n')
+                
             # Convert the vote string back to an EncryptedNumber
-            encrypted_number = paillier.EncryptedNumber(public_key, int(vote_str))
+            encrypted_vote = paillier.EncryptedNumber(pail_public_key, int(vote_str))
             # Decrypt the vote
-            decrypted_vote = pail_private_key.decrypt(encrypted_number)
+            decrypted_vote = pail_private_key.decrypt(encrypted_vote)
             print("Decrypted vote:", decrypted_vote)
 
             print()
