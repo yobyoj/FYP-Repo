@@ -200,7 +200,7 @@ const fetchPaillierPublicKey = async () => {
 
 
 /*********************Function to submit the vote *********************/
-  const submitVote = async (voteData, publicKey, digitalSignature) => {
+  const submitVote = async (voteData, publicKey, digitalSignature, electionid) => {
     try {
       const response = await fetch('http://localhost:8000/api/handle_Vote/', {
         method: 'POST',
@@ -210,7 +210,8 @@ const fetchPaillierPublicKey = async () => {
         body: JSON.stringify({ 
           voteData, 
           publicKey,
-          digitalSignature 
+          digitalSignature,
+          electionid
         }),
       });
       const result = await response.json();
@@ -240,7 +241,7 @@ const handleConfirmVote = () => {
   const encryptedVoteData = encryptVoteData(voteData);
   const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
 
-  submitVote(encryptedVoteData, keys.publicKey, digitalSignature);
+  submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id);
   console.log('after submitting the vote, the signature is: ', digitalSignature);
   setShowVoteModal(false);
   setShowFinalModal(true);

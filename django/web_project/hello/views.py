@@ -60,15 +60,29 @@ subject_uuids_dict = {
 encrypted_tallies = {}
 
 def initialize_tally(election_id, candidates, topics):
+    global encrypted_tallies
+    
+    # Create a dictionary for the election's tallies
     encrypted_tallies[election_id] = {}
+    print(f"Initializing tally for election {election_id}")
+    
+    print("Candidates:", candidates)
+    print("Topics:", topics)
+
+    # Initialize encrypted tally for each candidate
     for candidate in candidates:
-        candidate_uuid = candidate['uuid']
-        # Initialize the tally for each candidate
-        encrypted_tallies[election_id][candidate_uuid] = paillier.EncryptedNumber(pail_public_key, 0)  #setting to 0 and encrypting it
+        candidate_uuid = convert_uuid_to_bigint(candidate['uuid']) #convert string uuid into bigInt data type
+        # Set the initial tally for the candidate to 0, encrypted with the public key
+        encrypted_tallies[election_id][candidate_uuid] = paillier.EncryptedNumber(pail_public_key, 0)
         
+    # Initialize encrypted tally for each topic
     for topic in topics:
-        topic_uuid = topic['uuid']
-        encrypted_tallies[election_id][topic_uuid] = paillier.EncryptedNumber(pail_public_key, 0) #setting to 0 and encrypting it
+        topic_uuid =  convert_uuid_to_bigint(topic['uuid']) #convert string uuid into bigInt data type
+        # Set the initial tally for the topic to 0, encrypted with the public key
+        encrypted_tallies[election_id][topic_uuid] = paillier.EncryptedNumber(pail_public_key, 0)
+        
+    print("Updated encrypted_tallies:", encrypted_tallies)
+
 
 @csrf_exempt  # Remove for production (CSRF protection for token endpoint)
 def CSRFTokenDispenser(request):
@@ -106,39 +120,6 @@ def jsonReader(filePath):
     with open(filePath, 'r') as file:
         return json.load(file)
 
-"""
-# old login functions using json as db
-@csrf_exempt
-def loginFunc(request):
-    if request.method == 'POST':
-        try:
-            # Access JSON data from request body
-            data = json.loads(request.body)
-            print(data)
-            username = data.get('username')
-            password = data.get('password')
-            
-            # Error handling for missing keys
-            if not username or not password:
-                return JsonResponse({'error': 'Missing username or password', 'username': username, 'password': password}, status=400)
-            
-            # Construct the path to the accounts.json file
-            filePath = os.path.join(os.path.dirname(__file__), 'acc', 'accounts.json')
-            accList = jsonReader(filePath)
-            print(accList)
-            
-            for acc in accList:
-                if acc['email'].lower() == username.lower() and acc['pw'] == password:
-                    print("EMAIL AND PASSWORD IS CONFIRMED")
-                    return JsonResponse({'RESULT': acc['role']})
-            else:
-                return JsonResponse({'RESULT': 'deny'})  # Return JSON response if no match found
-        
-        except json.JSONDecodeError:
-            return JsonResponse({'RESULT': 'Invalid JSON data'}, status=400)
-    else:
-        return JsonResponse({'RESULT': 'Invalid request method'}, status=400)
-""" 
 
 @csrf_exempt
 def loginFunc(request):
@@ -340,18 +321,22 @@ def verify_signature_with_public_key(encrypted_vote_data, digital_signature, pub
     
 @csrf_exempt
 def handle_Vote(request):
+    global encrypted_tallies
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
             vote_str = data.get('voteData')  # Encrypted vote data as string
             rsa_public_key_data = data.get('publicKey')  # RSA Public key data
             signature = data.get('digitalSignature')
+            election_id = data.get('electionid')
 
             # For demonstration purposes, just print the received data
             print("Vote Data:", vote_str)
             print("Signature:", signature)
             print("Public Key:", rsa_public_key_data)
             print("Type of RSA Public Key Data:", type(rsa_public_key_data))
+            print("ELECTION ID:", election_id)
             
             
             #verify the signature
@@ -367,9 +352,13 @@ def handle_Vote(request):
             # Decrypt the vote
             decrypted_vote = pail_private_key.decrypt(encrypted_vote)
             print("Decrypted vote:", decrypted_vote)
-
+            
+            print(encrypted_tallies)
+            # if election_id not in encrypted_tallies:
+            #     return JsonResponse({'status': 'error', 'message': 'Election not found'}, status=404)
             print()
-            populate_uuid_from_ongoing_election()
+            
+            map_uuid_to_subject_in_ongoing_election()
             record = find_record_by_uuid(decrypted_vote)
             print(record)
             
@@ -391,7 +380,7 @@ def convert_uuid_to_bigint(uuid_str):
     # Convert UUID string to BigInt
     return int(uuid.UUID(uuid_str).hex, 16)
 
-def populate_uuid_from_ongoing_election():
+def map_uuid_to_subject_in_ongoing_election():
     global candidate_mapping, topic_mapping, subject_uuids_dict
     
     # Retrieve all ongoing elections
