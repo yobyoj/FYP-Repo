@@ -123,16 +123,16 @@ function Voting() {
 
   /*** RSA Key signing -- the voteData with the private key ***/
   const signDataWithPrivateKey = (data, privateKeyPem) => {
-    // Serialize data to a JSON string
-    const dataString = JSON.stringify(data.subject.name);
-  
+    // Directly use the UUID string
+    const dataString = data;
+
     // Convert PEM-formatted private key to a forge private key object
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-  
+
     // Create a message digest (hash) of the data
     const md = forge.md.sha256.create();
     md.update(dataString, 'utf8');
-  
+
     // Sign the message digest with the private key
     const signature = privateKey.sign(md);
 
@@ -141,6 +141,8 @@ function Voting() {
     console.log('Signature:' + signatureBase64);
     return signatureBase64;
   };
+
+
   
 
 
@@ -235,8 +237,8 @@ const handleConfirmVote = () => {
     //topic: name, description
   };
 
-  const digitalSignature = signDataWithPrivateKey(voteData, keys.privateKey);
   const encryptedVoteData = encryptVoteData(voteData);
+  const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
 
   submitVote(encryptedVoteData, keys.publicKey, digitalSignature);
   console.log('after submitting the vote, the signature is: ', digitalSignature);

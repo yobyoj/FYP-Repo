@@ -13,6 +13,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import uuid
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+from Crypto.Hash import SHA256
 
 from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection
 from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status
@@ -54,58 +57,22 @@ subject_uuids_dict = {
     'topics': topic_mapping
 }
 
+encrypted_tallies = {}
 
+def initialize_tally(election_id, candidates, topics):
+    encrypted_tallies[election_id] = {}
+    for candidate in candidates:
+        candidate_uuid = candidate['uuid']
+        # Initialize the tally for each candidate
+        encrypted_tallies[election_id][candidate_uuid] = paillier.EncryptedNumber(pail_public_key, 0)  #setting to 0 and encrypting it
+        
+    for topic in topics:
+        topic_uuid = topic['uuid']
+        encrypted_tallies[election_id][topic_uuid] = paillier.EncryptedNumber(pail_public_key, 0) #setting to 0 and encrypting it
 
 @csrf_exempt  # Remove for production (CSRF protection for token endpoint)
 def CSRFTokenDispenser(request):
   return JsonResponse({'csrfToken': request.META['CSRF_TOKEN']})
-
-
-@csrf_exempt 
-def home(request):
-    return HttpResponse("Hello, Django!")
-
-@csrf_exempt
-def vote(request):
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-    try: 
-        data = json.loads(request.body)
-        voted_for = data['candidate_name']
-        
-        vote_handling.voter_id_counter = vote_handling.voter_id_counter + 1
-        vote = vote_handling.Vote(vote_handling.voter_id_counter, voted_for)
-        
-        encrypted_vote, signature = vote_handling.encrypt_and_sign_vote(vote, vote_handling.paillier_public_key, vote_handling.rsa_private_key)
-        vote_handling.verify_append_signature(encrypted_vote, signature, vote_handling.rsa_public_key)    
-            
-         #react is expecting a json response  
-        return JsonResponse({'status': 'success', 'message': 'Vote recorded!'})
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    
-    
-@csrf_exempt
-def terminate_election(request):
-    if request.method == 'POST':
-        try:
-            Naomi_tally, Jason_tally =vote_handling.shuffle_and_calculate_tally(vote_handling.paillier_public_key, vote_handling.paillier_private_key)
-            
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Election terminated successfully!',
-                'results': {
-                    'Jason': Jason_tally,
-                    'Naomi': Naomi_tally
-                }
-            })
-            
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
 #LOGIN FUNCTIONS
@@ -270,7 +237,12 @@ def handle_new_election(request):
             )
             new_election.save()
 
-            print(candidates)
+            # Retrieve the election ID
+            election_id = new_election.id
+
+            # Initialize the tally for each candidate in this election
+            initialize_tally(election_id, candidates, topics)
+            
             # Add voters to ElectionVoterStatus
             add_voters_to_status(new_election)
 
@@ -313,8 +285,6 @@ def add_voters_to_status(election):
                     pass
 
 
-
-
 class DisplayElections(generics.ListAPIView):
     queryset = Election.objects.all()
     serializer_class = ElectionSerializer
@@ -349,46 +319,32 @@ def get_user_elections(request):
         serializer = OngoingElectionSerializer(elections, many=True)
         return Response({'elections': serializer.data}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid HTTP method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# @csrf_exempt
-# def handle_Vote(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))
-#             vote = data.get('voteData')
-#             signature = data.get('signature')
-#             public_key = data.get('publicKey')
-
-#             # For demonstration purposes, just print the received data
-#             print("Vote Data:", vote)
-#             print("Signature:", signature)
-#             print("Public Key:", public_key)
-
-#             # TODO: Process the vote and public key
-#             # For example, you might want to save this data to your database
-
-#             # encrypted_number = pail_public_key.encrypt(12345)
-#             decrypted_number = pail_private_key.decrypt(vote)
-#             print("decrypted vote: ", decrypted_number)
-
-#             # Return a success response
-#             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
-#         except json.JSONDecodeError:
-#             return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
-#         except Exception as e:
-#             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-#     else:
-#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
   
   
+def verify_signature_with_public_key(encrypted_vote_data, digital_signature, public_key_pem):
+    # Convert PEM-formatted public key to an RSA key object
+    public_key = RSA.import_key(public_key_pem)
+
+    # Create a SHA-256 hash of the encrypted vote data
+    h = SHA256.new(encrypted_vote_data.encode('utf-8'))
+
+    # Decode the base64-encoded signature
+    signature = base64.b64decode(digital_signature)
+
+    try:
+        # Verify the signature using the public key and the hash
+        pkcs1_15.new(public_key).verify(h, signature)
+        return True
+    except (ValueError, TypeError):
+        return False
+    
 @csrf_exempt
 def handle_Vote(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
             vote_str = data.get('voteData')  # Encrypted vote data as string
-            public_key_data = data.get('publicKey')  # Public key data
+            public_key_data = data.get('publicKey')  # Paillier Public key data
             signature = data.get('digitalSignature')
 
             # For demonstration purposes, just print the received data
@@ -400,7 +356,7 @@ def handle_Vote(request):
             if isinstance(public_key_data, str):
                 return JsonResponse({'status': 'error', 'message': 'Public key data is not in the correct format'}, status=400)
 
-            # Reconstruct the public key
+            # Reconstruct the paillier public key
             n = int(public_key_data['n'])
             public_key = paillier.PaillierPublicKey(n)
 
@@ -412,18 +368,8 @@ def handle_Vote(request):
 
             print()
             populate_uuid_from_ongoing_election()
-            print()
             record = find_record_by_uuid(decrypted_vote)
             print(record)
-            
-            
-            # uuid_to_find = 309505247725844061019437226599636106904
-            # record = find_record_by_uuid(uuid_to_find)
-            # print(record)
-            
-            # uuid_to_find_topic = 335446717365483857376061749315514104186
-            # record = find_record_by_uuid(uuid_to_find_topic)
-            # print(record)
             
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
