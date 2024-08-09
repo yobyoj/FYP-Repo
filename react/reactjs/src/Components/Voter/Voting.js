@@ -5,7 +5,9 @@ import Sidebar from './Sidebar';
 import './Voting.css';
 import avatar from '../../stock_avatar.jpg';  
 import forge from 'node-forge';
-import { publicKeyFromJSON } from 'paillier-js';
+import * as paillierBigint from 'paillier-bigint';
+
+
 
 function Voting() {
   // State for various modals
@@ -125,22 +127,27 @@ function Voting() {
 /*******************Fetch the paillier public key from django side**************************/
   const fetchPaillierPublicKey = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/get_paillier_public_key/');
-      const data = await response.json();
-      const paillierPublicKey = publicKeyFromJSON(data);
-      setPaillierPublicKey(paillierPublicKey);
-      console.log(paillierPublicKey);
+        const response = await fetch('http://localhost:8000/api/get_paillier_public_key/');
+        const data = await response.json();
+        const publicKey = new paillierBigint.PublicKey(BigInt(data.n));
+        setPaillierPublicKey(publicKey);
+        console.log('Paillier Public Key:', publicKey);
     } catch (error) {
-      console.error('Error fetching Paillier public key:', error);
+        console.error('Error fetching Paillier public key:', error);
     }
   };
 
-//   // Function to encrypt vote data using Paillier public key
-//   const encryptVoteData = (voteData, paillierPublicKey) => {
-//     const plaintext = BigInt(voteData); // Ensure voteData is a BigInt
-//     return paillierPublicKey.encrypt(plaintext);
-//   };
 
+ // Function to encrypt vote data using Paillier public key
+  const encryptVoteData = (voteData) => {
+    if (!paillierPublicKey) {
+        console.error('Paillier public key not available');
+        return null;
+    }
+    const plaintext = BigInt(voteData.subject.id); // Assuming voteData has a numeric ID for subject
+    const encryptedData = paillierPublicKey.encrypt(plaintext);
+    return encryptedData.toString(); // Convert BigInt to string for transmission
+  };
 
 
 
