@@ -78,8 +78,33 @@ class Election(models.Model):
     def __str__(self):
         return self.title
 
-     
+class OngoingElection(models.Model):
+    ELECTION_TYPE_CHOICES = [
+        ('Candidates', 'Candidates'),
+        ('Topics', 'Topics'),
+    ]
+
+    id = models.IntegerField(primary_key=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    startDate = models.DateTimeField()
+    endDate = models.DateTimeField()
+    timezone = models.CharField(max_length=50, blank=True, null=True)
+    electionType = models.CharField(max_length=10, choices=ELECTION_TYPE_CHOICES, default='Candidates')
+    candidates = models.JSONField(blank=True, null=True)
+    topics = models.JSONField(blank=True, null=True)
+    voters = models.JSONField(blank=True, null=True)
+    votersDept = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        db_table = 'ongoing_elections'
+
+    def __str__(self):
+        return self.title    
     
+
 class ElectionVoterStatus(models.Model):
     election_voter_status_id = models.AutoField(primary_key=True)
     election = models.ForeignKey(Election, on_delete=models.CASCADE, db_column='election_id')

@@ -74,12 +74,12 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
 
 import json
 
-def get_user_elections_with_status(userid):
+def get_ongoing_user_elections_with_status(userid):
     # Define the SQL query to join election_voter_status with elections for the given userid
     query = f"""
         SELECT e.*, evs.userid, evs.has_voted
         FROM election_voter_status evs
-        JOIN elections e ON evs.election_id = e.id
+        JOIN ongoing_elections e ON evs.election_id = e.id
         WHERE evs.userid = {userid}
     """
     
@@ -89,7 +89,7 @@ def get_user_elections_with_status(userid):
     if result:
         # Example column names including the ones from election_voter_status
         column_names = ['id', 'title', 'description', 'startDate', 'endDate', 'timezone',
-                        'electionType', 'candidates', 'topics', 'voters', 'votersDept', 'status',
+                        'electionType', 'candidates', 'topics', 'voters', 'votersDept',
                         'created_at', 'updated_at', 'userid', 'has_voted']
 
         user_elections = []

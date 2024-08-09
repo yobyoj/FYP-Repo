@@ -178,9 +178,9 @@ const fetchPaillierPublicKey = async () => {
         return null;
     }
     // Assuming the 'name' field is what you want to encrypt
-    const nameToEncrypt = voteData.subject.name;
+    const uuidToEncrypt = voteData.subject.uuid;
     // Convert the name to a BigInt by hashing it
-    const plaintextBigInt = stringToBigInt(nameToEncrypt);
+    const plaintextBigInt = convertUuidToBigInt(uuidToEncrypt);
     // Explicitly ensure the Paillier encryption operates on BigInts
     try {
         const encryptedData = paillierPublicKey.encrypt(plaintextBigInt);   
@@ -191,12 +191,10 @@ const fetchPaillierPublicKey = async () => {
     }
   };
 
-  const stringToBigInt = (str) => {
-    const hash = forge.md.sha256.create(); // Using SHA-256 for hashing
-    hash.update(str);
-    const hashHex = hash.digest().toHex(); // Get the hash as a hex string
-    return BigInt(`0x${hashHex}`); // Convert hex string to BigInt
+  const convertUuidToBigInt = (uuid) => {
+    return BigInt(`0x${uuid.replace(/-/g, '')}`);
 };
+
 
 
 /*********************Function to submit the vote *********************/

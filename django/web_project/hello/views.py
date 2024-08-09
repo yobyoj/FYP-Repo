@@ -2,20 +2,20 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .utilities import vote_handling
-from .utilities import ElectionHandling
 import traceback
 import json
 from hello.acc.jsonFuncs import jsonReader
-from .serializer import ElectionSerializer
+from .serializer import ElectionSerializer, OngoingElectionSerializer
 from rest_framework import generics
 from datetime import datetime
 import pytz
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import uuid
 
-from .models import Election, UserAccount, ElectionVoterStatus, Department
-from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_user_elections_with_status
+from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection
+from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status
 
 
 import os
@@ -46,6 +46,13 @@ pail_public_key_json = {
     "n": str(pail_public_key.n),  # Paillier public key's modulus (big integer as string)
 }
 
+# Define global variables
+candidate_mapping = {}
+topic_mapping = {}
+subject_uuids_dict = {
+    'candidates': candidate_mapping,
+    'topics': topic_mapping
+}
 
 
 
@@ -263,6 +270,7 @@ def handle_new_election(request):
             )
             new_election.save()
 
+            print(candidates)
             # Add voters to ElectionVoterStatus
             add_voters_to_status(new_election)
 
@@ -337,8 +345,8 @@ def delete_election(request, id):
 def get_user_elections(request):
     if request.method == 'GET':
         userid = request.GET.get('userid')
-        elections = get_user_elections_with_status(userid)
-        serializer = ElectionSerializer(elections, many=True)
+        elections = get_ongoing_user_elections_with_status(userid)
+        serializer = OngoingElectionSerializer(elections, many=True)
         return Response({'elections': serializer.data}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid HTTP method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -398,15 +406,25 @@ def handle_Vote(request):
 
             # Convert the vote string back to an EncryptedNumber
             encrypted_number = paillier.EncryptedNumber(public_key, int(vote_str))
-
-            # Assuming you have the private key available for decryption
-            # This would typically be securely stored and not hardcoded
-            #private_key = paillier.PaillierPrivateKey(public_key, p, q)  # Replace `p` and `q` with your private key primes
-
             # Decrypt the vote
             decrypted_vote = pail_private_key.decrypt(encrypted_number)
             print("Decrypted vote:", decrypted_vote)
 
+            print()
+            populate_uuid_from_ongoing_election()
+            print()
+            record = find_record_by_uuid(decrypted_vote)
+            print(record)
+            
+            
+            # uuid_to_find = 309505247725844061019437226599636106904
+            # record = find_record_by_uuid(uuid_to_find)
+            # print(record)
+            
+            # uuid_to_find_topic = 335446717365483857376061749315514104186
+            # record = find_record_by_uuid(uuid_to_find_topic)
+            # print(record)
+            
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
         except json.JSONDecodeError:
@@ -417,11 +435,72 @@ def handle_Vote(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)  
   
   
-  
-  
-    
-    
 @csrf_exempt    
 def get_paillier_public_key(request):
     return JsonResponse(pail_public_key_json)   
 
+def convert_uuid_to_bigint(uuid_str):
+    # Convert UUID string to BigInt
+    return int(uuid.UUID(uuid_str).hex, 16)
+
+def populate_uuid_from_ongoing_election():
+    global candidate_mapping, topic_mapping, subject_uuids_dict
+    
+    # Retrieve all ongoing elections
+    ongoing_elections = OngoingElection.objects.all()
+    
+    # Create lists to store all candidates and topics from each election
+    all_candidates = []
+    all_topics = []
+    
+    for election in ongoing_elections:
+        # Extract candidates and topics from each election
+        all_candidates.extend(election.candidates)
+        all_topics.extend(election.topics)
+    
+    # Clear the previous mappings
+    candidate_mapping.clear()
+    topic_mapping.clear()
+    
+    # Populate the candidate mapping dictionary
+    for candidate in all_candidates:
+        uuid = candidate.get('uuid')
+        name = candidate.get('name')
+        email = candidate.get('email')
+        if uuid and name and email:
+            key = f"{name} | {email}"  # Combine name and email as the key
+            uuid_bigint = convert_uuid_to_bigint(uuid) #Convert all the string uuids into big int data type
+            candidate_mapping[key] = uuid_bigint
+    
+    # Populate the topic mapping dictionary
+    for topic in all_topics:
+        uuid = topic.get('uuid')
+        name = topic.get('name')
+        if uuid and name:
+            uuid_bigint = convert_uuid_to_bigint(uuid) #Convert all the string uuids into big int data type           
+            topic_mapping[name] = uuid_bigint
+    
+    # Update the combined dictionary
+    subject_uuids_dict['candidates'] = candidate_mapping
+    subject_uuids_dict['topics'] = topic_mapping
+    
+    # Print the combined dictionary
+    print(subject_uuids_dict)
+
+
+def find_record_by_uuid(uuid):
+    global candidate_mapping, topic_mapping, subject_uuids_dict
+    
+    # Search in candidates
+    for key, uuid_value in subject_uuids_dict['candidates'].items():
+        if uuid_value == uuid:
+            name, email = key.split(' | ')
+            return {'type': 'candidate', 'name': name, 'email': email}
+    
+    # Search in topics
+    for topic_name, uuid_value in subject_uuids_dict['topics'].items():
+        if uuid_value == uuid:
+            return {'type': 'topic', 'name': topic_name}
+    
+    # If UUID not found
+    return None

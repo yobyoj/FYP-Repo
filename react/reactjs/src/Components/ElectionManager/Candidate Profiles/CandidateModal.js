@@ -1,6 +1,5 @@
-/* for election manager */
-
 import React, { useState } from "react";
+import { v4 as uuidv4 } from 'uuid'; // Import the uuid library
 import './CandidateModal.css';
 
 function CandidateModal({ isOpen, onClose, onSave }) {
@@ -11,7 +10,8 @@ function CandidateModal({ isOpen, onClose, onSave }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ name, email, role, description }); // Pass the new candidate object to the onSave function
+        const uuid = uuidv4(); // Generate a UUID for the candidate
+        onSave({ name, email, role, description, uuid }); // Include the UUID in the candidate object
         onClose();
     };
 

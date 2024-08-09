@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { v4 as uuidv4 } from 'uuid'; // Import the uuid library
 import './TopicsModal.css';
 
 function TopicsModal({ isOpen, onClose, onSave }) {
@@ -7,7 +8,8 @@ function TopicsModal({ isOpen, onClose, onSave }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ name, description }); // Pass the new topic object to the onSave function
+        const uuid = uuidv4(); // Generate a UUID for the topic
+        onSave({ name, description, uuid }); // Pass the new topic object to the onSave function
         onClose();
     };
 
