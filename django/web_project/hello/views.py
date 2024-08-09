@@ -343,33 +343,69 @@ def get_user_elections(request):
     return Response({'error': 'Invalid HTTP method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+# @csrf_exempt
+# def handle_Vote(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+#             vote = data.get('voteData')
+#             signature = data.get('signature')
+#             public_key = data.get('publicKey')
+
+#             # For demonstration purposes, just print the received data
+#             print("Vote Data:", vote)
+#             print("Signature:", signature)
+#             print("Public Key:", public_key)
+
+#             # TODO: Process the vote and public key
+#             # For example, you might want to save this data to your database
+
+#             # encrypted_number = pail_public_key.encrypt(12345)
+#             decrypted_number = pail_private_key.decrypt(vote)
+#             print("decrypted vote: ", decrypted_number)
+
+#             # Return a success response
+#             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
+#         except json.JSONDecodeError:
+#             return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+#         except Exception as e:
+#             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+  
+  
 @csrf_exempt
 def handle_Vote(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            vote = data.get('voteData')
-            signature = data.get('signature')
-            public_key = data.get('publicKey')
+            vote_str = data.get('voteData')  # Encrypted vote data as string
+            public_key_data = data.get('publicKey')  # Public key data
+            signature = data.get('digitalSignature')
 
             # For demonstration purposes, just print the received data
-            print("Vote Data:", vote)
+            print("Vote Data:", vote_str)
             print("Signature:", signature)
-            print("Public Key:", public_key)
-
-            # TODO: Process the vote and public key
-            # For example, you might want to save this data to your database
+            print("Public Key:", public_key_data)
+            print("Type of Public Key Data:", type(public_key_data))
             
-            print('Serialized public key:', public_key_serialized)
-            print()
-            print('Serialized priv key:', private_key_serialized)
-            print()
+            if isinstance(public_key_data, str):
+                return JsonResponse({'status': 'error', 'message': 'Public key data is not in the correct format'}, status=400)
 
-            encrypted_number = pail_public_key.encrypt(12345)
-            decrypted_number = pail_private_key.decrypt(encrypted_number)
-            
-            print('enc',encrypted_number)
-            print('dec',decrypted_number)
+            # Reconstruct the public key
+            n = int(public_key_data['n'])
+            public_key = paillier.PaillierPublicKey(n)
+
+            # Convert the vote string back to an EncryptedNumber
+            encrypted_number = paillier.EncryptedNumber(public_key, int(vote_str))
+
+            # Assuming you have the private key available for decryption
+            # This would typically be securely stored and not hardcoded
+            #private_key = paillier.PaillierPrivateKey(public_key, p, q)  # Replace `p` and `q` with your private key primes
+
+            # Decrypt the vote
+            decrypted_vote = pail_private_key.decrypt(encrypted_number)
+            print("Decrypted vote:", decrypted_vote)
 
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
@@ -378,9 +414,14 @@ def handle_Vote(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)  
+  
+  
+  
+  
     
     
 @csrf_exempt    
 def get_paillier_public_key(request):
     return JsonResponse(pail_public_key_json)   
+

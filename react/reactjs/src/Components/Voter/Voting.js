@@ -56,15 +56,36 @@ function Voting() {
     setShowRulesModal(false);
   };
 
-  // useEffect to show rules modal on component mount and generate keys
-  useEffect(() => {
-    setShowRulesModal(true); // Show rules modal when component mounts
-    if (!keysGeneratedRef.current) {
-      generateKeys(); // Generate keys only if they haven't been generated yet
-      fetchPaillierPublicKey(); // Fetch the Paillier public key
-      keysGeneratedRef.current = true; // Mark keys as generated
+
+
+/***************to delete***/
+  const checkPaillierPublicKeyComponents = (paillierPublicKey) => {
+    console.log('Public Key Components:');
+    console.log('n:', paillierPublicKey.n, typeof paillierPublicKey.n);
+    console.log('n2:', paillierPublicKey.n2, typeof paillierPublicKey.n2);
+
+    if (paillierPublicKey.g) {
+        console.log('g:', paillierPublicKey.g, typeof paillierPublicKey.g);
+    } else {
+        console.log('g is undefined or not used');
     }
-  }, []); // Empty dependency array ensures this runs only once on mount
+  };
+
+  // Call this function after fetching the public key
+  useEffect(() => {
+      setShowRulesModal(true); // Show rules modal when component mounts
+      if (!keysGeneratedRef.current) {
+          generateKeys(); // Generate keys only if they haven't been generated yet
+          fetchPaillierPublicKey(); // Fetch the Paillier public key
+          keysGeneratedRef.current = true; // Mark keys as generated
+      }
+      
+      if (paillierPublicKey) {
+          checkPaillierPublicKeyComponents(paillierPublicKey); // Check public key components
+      }
+  }, []); 
+
+
 
 
 
@@ -92,7 +113,7 @@ function Voting() {
       // Set generated keys in state
       setKeys({ publicKey: publicKeyPem, privateKey: privateKeyPem });
       console.log({ publicKey: publicKeyPem, privateKey: privateKeyPem });
-      console.log('Keys should have been generated');
+      console.log("RSA Keys should have been generated");
     } catch (err) {
       console.error('Error generating keys:', err);
     }
@@ -103,7 +124,7 @@ function Voting() {
   /*** RSA Key signing -- the voteData with the private key ***/
   const signDataWithPrivateKey = (data, privateKeyPem) => {
     // Serialize data to a JSON string
-    const dataString = JSON.stringify(data);
+    const dataString = JSON.stringify(data.subject.name);
   
     // Convert PEM-formatted private key to a forge private key object
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
@@ -125,17 +146,29 @@ function Voting() {
 
 
 /*******************Fetch the paillier public key from django side**************************/
-  const fetchPaillierPublicKey = async () => {
+const fetchPaillierPublicKey = async () => {
     try {
         const response = await fetch('http://localhost:8000/api/get_paillier_public_key/');
         const data = await response.json();
-        const publicKey = new paillierBigint.PublicKey(BigInt(data.n));
-        setPaillierPublicKey(publicKey);
-        console.log('Paillier Public Key:', publicKey);
+        
+        // Calculate n2 as n^2
+        const n = BigInt(data.n);
+        const n2 = n ** BigInt(2);
+        const g = n + BigInt(1); // Assuming g = n + 1, but verify this
+
+        console.log('Computed n2:', n2.toString());
+        console.log('Computed g:', g.toString());
+        // Create the public key using the paillier-bigint library
+        const pail_publicKey = new paillierBigint.PublicKey(n, g, n2);
+
+        setPaillierPublicKey(pail_publicKey);
+        console.log('Paillier Public Key:', pail_publicKey);
     } catch (error) {
         console.error('Error fetching Paillier public key:', error);
     }
-  };
+};
+
+
 
 
  // Function to encrypt vote data using Paillier public key
@@ -144,11 +177,26 @@ function Voting() {
         console.error('Paillier public key not available');
         return null;
     }
-    const plaintext = BigInt(voteData.subject.id); // Assuming voteData has a numeric ID for subject
-    const encryptedData = paillierPublicKey.encrypt(plaintext);
-    return encryptedData.toString(); // Convert BigInt to string for transmission
+    // Assuming the 'name' field is what you want to encrypt
+    const nameToEncrypt = voteData.subject.name;
+    // Convert the name to a BigInt by hashing it
+    const plaintextBigInt = stringToBigInt(nameToEncrypt);
+    // Explicitly ensure the Paillier encryption operates on BigInts
+    try {
+        const encryptedData = paillierPublicKey.encrypt(plaintextBigInt);   
+        return encryptedData.toString(); // Convert BigInt to string for transmission
+    } catch (error) {
+        console.error('Encryption failed:', error);
+        return null;
+    }
   };
 
+  const stringToBigInt = (str) => {
+    const hash = forge.md.sha256.create(); // Using SHA-256 for hashing
+    hash.update(str);
+    const hashHex = hash.digest().toHex(); // Get the hash as a hex string
+    return BigInt(`0x${hashHex}`); // Convert hex string to BigInt
+};
 
 
 /*********************Function to submit the vote *********************/
@@ -159,7 +207,11 @@ function Voting() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ voteData, publicKey, digitalSignature }),
+        body: JSON.stringify({ 
+          voteData, 
+          publicKey: { n: paillierPublicKey.n.toString() }, // Send `publicKey` as an object
+          digitalSignature 
+        }),
       });
       const result = await response.json();
       console.log('Vote submitted successfully:', result);
@@ -186,9 +238,10 @@ const handleConfirmVote = () => {
   };
 
   const digitalSignature = signDataWithPrivateKey(voteData, keys.privateKey);
-  //const encryptedVoteData = encryptVoteData(voteData, )
+  const encryptedVoteData = encryptVoteData(voteData);
 
-  submitVote(voteData, keys.publicKey, digitalSignature);
+  submitVote(encryptedVoteData, keys.publicKey, digitalSignature);
+  console.log('after submitting the vote, the signature is: ', digitalSignature);
   setShowVoteModal(false);
   setShowFinalModal(true);
 
