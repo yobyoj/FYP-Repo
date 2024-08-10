@@ -121,3 +121,12 @@ class ElectionVoterStatus(models.Model):
     def __str__(self):
         return f"User: {self.user}, Election: {self.election}, Has Voted: {self.has_voted}"
 
+
+class EncryptedTally(models.Model):
+    election_id = models.IntegerField()
+    uuid = models.CharField(max_length=36)  # Store UUID as a string (36 characters for a standard UUID)
+    encrypted_tally = models.TextField()  # Store the encrypted tally as a text (e.g., base64-encoded string)
+
+    class Meta:
+        unique_together = ('election_id', 'uuid')
+        db_table = 'encrypted_tally'
