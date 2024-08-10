@@ -111,10 +111,14 @@ def get_ongoing_user_elections_with_status(userid):
         return []
 
 
-    
-# Execute the query for the user 'voter001' from the 'IT' department
-# user_related_elections = get_user_related_elections('voter001', 'IT')
 
-# # Print the results
-# for election in user_related_elections:
-#     print(election)
+def update_election_voter_status(electionid, userid):
+      # Define the SQL query to join election_voter_status with elections for the given userid
+    query = f"""
+        UPDATE election_voter_status
+        SET has_voted = TRUE
+        WHERE election_id = {electionid} AND userid = {userid};
+
+    """    
+    # Execute the query and fetch the results
+    sql_sendQuery(query)

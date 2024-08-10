@@ -18,7 +18,7 @@ from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 
 from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection
-from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status
+from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status
 
 
 import os
@@ -232,7 +232,7 @@ def handle_new_election(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
-
+#updates the election-voter-status table
 def add_voters_to_status(election):
     # Add individual voters based on voterEmail
     if election.voters:
@@ -296,6 +296,7 @@ def delete_election(request, id):
 def get_user_elections(request):
     if request.method == 'GET':
         userid = request.GET.get('userid')
+        update_election_statuses() ###########################################################to delete once the cron jobs is up
         elections = get_ongoing_user_elections_with_status(userid)
         serializer = OngoingElectionSerializer(elections, many=True)
         return Response({'elections': serializer.data}, status=status.HTTP_200_OK)
@@ -331,8 +332,9 @@ def handle_Vote(request):
             signature = data.get('digitalSignature')
             election_id = data.get('electionid')
 
-            # For demonstration purposes, just print the received data
-            print("Vote Data:", vote_str)
+            #user_id = data.get('userid') #user id, dervied from session
+            
+            
             print("Signature:", signature)
             print("Public Key:", rsa_public_key_data)
             print("Type of RSA Public Key Data:", type(rsa_public_key_data))
@@ -354,13 +356,16 @@ def handle_Vote(request):
             print("Decrypted vote:", decrypted_vote)
             
             print(encrypted_tallies)
-            # if election_id not in encrypted_tallies:
-            #     return JsonResponse({'status': 'error', 'message': 'Election not found'}, status=404)
+            if election_id not in encrypted_tallies: #might cause frequent errors if the global tally dictionary is reset
+                return JsonResponse({'status': 'error', 'message': 'Election not found'}, status=404)
             print()
             
             map_uuid_to_subject_in_ongoing_election()
-            record = find_record_by_uuid(decrypted_vote)
-            print(record)
+            vote_value = find_voted_subject_by_uuid_and_increment_vote(decrypted_vote)
+            print(vote_value)
+            
+            #update the EVS table accordingly, set the voter's has_voted to true
+            update_election_voter_status(election_id, 29, 1)
             
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
@@ -380,6 +385,8 @@ def convert_uuid_to_bigint(uuid_str):
     # Convert UUID string to BigInt
     return int(uuid.UUID(uuid_str).hex, 16)
 
+
+#populate the uuid dictionaries from the json retrieved from the ongoing elections
 def map_uuid_to_subject_in_ongoing_election():
     global candidate_mapping, topic_mapping, subject_uuids_dict
     
@@ -421,23 +428,84 @@ def map_uuid_to_subject_in_ongoing_election():
     subject_uuids_dict['candidates'] = candidate_mapping
     subject_uuids_dict['topics'] = topic_mapping
     
-    # Print the combined dictionary
-    print(subject_uuids_dict)
+    print('Printing the mapped UUID dictionary:', subject_uuids_dict)
 
 
-def find_record_by_uuid(uuid):
+#Finds the candidate voted for by comparing the bigInt UUIDs and handles the vote incrementation
+def find_voted_subject_by_uuid_and_increment_vote(electionid, uuid):
     global candidate_mapping, topic_mapping, subject_uuids_dict
     
     # Search in candidates
     for key, uuid_value in subject_uuids_dict['candidates'].items():
         if uuid_value == uuid:
             name, email = key.split(' | ')
-            return {'type': 'candidate', 'name': name, 'email': email}
+            print("The record voted for is: {'type': 'candidate' , 'name': ", name, "'email':" , email,"}") 
+            increment_vote(electionid, uuid) #once the relevant candidate has been found, increment the vote count
+            return name
     
     # Search in topics
     for topic_name, uuid_value in subject_uuids_dict['topics'].items():
         if uuid_value == uuid:
-            return {'type': 'topic', 'name': topic_name}
+            print("The record voted for is: {'type': 'topic' , 'name': ", topic_name, "}") 
+            increment_vote(electionid, uuid) #once the relevant candidate has been found, increment the vote count
+            return topic_name
     
     # If UUID not found
     return None
+
+def increment_vote(electionid, uuid, increment=1):
+    global encrypted_tallies
+    encrypted_increment = paillier.EncryptedNumber(pail_public_key, increment) #encrypting 1 with paillier
+
+    # Retrieve the current encrypted tally for the given UUID
+    current_tally = encrypted_tallies[electionid][uuid]
+    
+    # Increase the tally by adding the encrypted increment
+    updated_tally = current_tally + encrypted_increment
+    
+    # Update the tally in the encrypted_tallies dictionary
+    encrypted_tallies[electionid][uuid] = updated_tally
+    
+    print(f"Tally updated for UUID {uuid}: {encrypted_tallies[electionid][uuid]}")
+
+
+
+###################################delete once the cron jobs is up
+from django.utils import timezone
+
+def update_election_statuses():
+    now = timezone.now()
+    
+    # Step 1: Update the status of all elections
+    elections = Election.objects.all()
+    for election in elections:
+        if election.startDate > now:
+            election.status = 'Scheduled'
+        elif election.startDate <= now <= election.endDate:
+            election.status = 'Ongoing'
+        else:
+            election.status = 'Completed'
+        election.save()
+
+    # Step 2: Check and add ongoing elections to OngoingElection table
+    for election in elections:
+        if election.status == 'Ongoing':
+            # Check if the election already exists in OngoingElection table
+            ongoing_election_exists = OngoingElection.objects.filter(id=election.id).exists()
+            
+            if not ongoing_election_exists:
+                # Add the ongoing election to the OngoingElection table
+                OngoingElection.objects.create(
+                    id=election.id,
+                    title=election.title,
+                    description=election.description,
+                    startDate=election.startDate,
+                    endDate=election.endDate,
+                    timezone=election.timezone,
+                    electionType=election.electionType,
+                    candidates=election.candidates,
+                    topics=election.topics,
+                    voters=election.voters,
+                    votersDept=election.votersDept
+                )
+    print('Electoins have been updated')
