@@ -83,11 +83,13 @@ def initialize_tally(election_id, candidates, topics):
                 candidate_uuid = candidate['uuid']  # Use the UUID as a string
                 
                 # Set the initial tally for the candidate to 0, encrypted with the public key
-                encrypted_tally = paillier.EncryptedNumber(pail_public_key, 0)
+                encrypted_tally = paillier.EncryptedNumber(pail_public_key, 1)
                 
                 # Convert the encrypted tally's ciphertext to a string for storage
                 encrypted_tally_str = str(encrypted_tally.ciphertext()) 
-
+                print(f"Serialized Tally String: {encrypted_tally_str}")
+                
+                
                 # Store the encrypted tally in the database
                 EncryptedTally.objects.update_or_create(
                     election_id=election_id,
@@ -103,10 +105,11 @@ def initialize_tally(election_id, candidates, topics):
                 print("topic uuid is:", topic_uuid)
                 
                 # Set the initial tally for the topic to 0, encrypted with the public key
-                encrypted_tally = paillier.EncryptedNumber(pail_public_key, 5)
+                encrypted_tally = paillier.EncryptedNumber(pail_public_key, 1)     
                 
                 # Convert the encrypted tally's ciphertext to a string for storage
                 encrypted_tally_str = str(encrypted_tally.ciphertext()) 
+                print(f"Serialized Tally String: {encrypted_tally_str}")
 
                 # Store the encrypted tally in the database
                 EncryptedTally.objects.update_or_create(
@@ -143,10 +146,13 @@ def load_tallies_from_db():
         election_id = tally.election_id
         uuid_str = tally.uuid  # UUID is stored as a string
         encrypted_tally_str = tally.encrypted_tally
-        print(election_id)
         
         # Convert the UUID string back to BigInt
-        uuid_bigint = convert_uuid_to_bigint(uuid_str)
+        try:
+            uuid_bigint = convert_uuid_to_bigint(uuid_str)
+        except ValueError as e:
+            logging.error(f"Invalid UUID detected: {uuid_str}. Error: {e}")
+            continue  # Skip this entry and move on to the next
 
         # Deserialize the encrypted tally string back into an EncryptedNumber object
         encrypted_tally = paillier.EncryptedNumber(pail_public_key, int(encrypted_tally_str))
@@ -470,6 +476,11 @@ def convert_uuid_to_bigint(uuid_str):
     # Convert UUID string to BigInt
     return int(uuid.UUID(uuid_str).hex, 16)
 
+def convert_bigint_to_uuid(uuid_bigint):
+    # Convert the BigInt back to a hex string, ensuring it is padded to 32 characters
+    hex_str = f'{uuid_bigint:032x}'   
+    # Format the hex string into the UUID format (8-4-4-4-12)
+    return str(uuid.UUID(hex=hex_str))
 
 #populate the uuid dictionaries from the json retrieved from the ongoing elections
 def map_uuid_to_subject_in_ongoing_election():
@@ -538,27 +549,36 @@ def find_voted_subject_by_uuid_and_increment_vote(electionid, uuid):
     # If UUID not found
     return None
 
-def increment_vote(electionid, uuid, increment=1):
+def increment_vote(electionid, uuid_bigint, increment=1):
     global encrypted_tallies
-    encrypted_increment = paillier.EncryptedNumber(pail_public_key, increment) #encrypting 1 with paillier
-
-    # Retrieve the current encrypted tally for the given UUID
-    current_tally = encrypted_tallies[electionid][uuid]
+    
+    uuid_str = convert_bigint_to_uuid(uuid_bigint)
+    encrypted_increment = paillier.EncryptedNumber(pail_public_key, increment)  # Encrypting the increment value
+    
+    # Retrieve the current encrypted tally for the given UUID from the global dictionary
+    current_tally = encrypted_tallies.get(electionid, {}).get(uuid_bigint) 
+    if current_tally is None:
+        raise ValueError(f"No tally found for election_id {electionid} and UUID {uuid_bigint}")
     
     # Increase the tally by adding the encrypted increment
-    updated_tally = current_tally + encrypted_increment
-    
+    updated_tally = current_tally + encrypted_increment 
     # Update the tally in the encrypted_tallies dictionary
-    encrypted_tallies[electionid][uuid] = updated_tally
-    
+    encrypted_tallies[electionid][uuid_bigint] = updated_tally   
     # Serialize the updated encrypted tally back to a string
     updated_tally_str = str(updated_tally.ciphertext())
+    print(f"Updating tally for election_id: {electionid}, UUID: {uuid_bigint}, New Tally: {updated_tally_str}")
+
     
-    EncryptedTally.objects.filter(election_id=electionid, uuid=uuid).update(
-        encrypted_tally=updated_tally_str #updates the tally in the database
-    )
-    
-    print(f"Tally updated for UUID {uuid}: {encrypted_tallies[electionid][uuid]}")
+    # Update the tally in the database and check if it was successful
+    rows_updated = EncryptedTally.objects.filter(
+        election_id=electionid,
+        uuid=uuid_str
+    ).update(encrypted_tally=updated_tally_str)
+
+    if rows_updated > 0:
+        print(f"Successfully updated tally for UUID {uuid_str}.")
+    else:
+        print(f"Tally update failed for UUID {uuid_str}. No record found to update.")
 
 
 
@@ -600,4 +620,5 @@ def update_election_statuses():
                     voters=election.voters,
                     votersDept=election.votersDept
                 )
-    print('Electoins have been updated')
+                
+    print('Elections have been updated')

@@ -130,3 +130,23 @@ class EncryptedTally(models.Model):
     class Meta:
         unique_together = ('election_id', 'uuid')
         db_table = 'encrypted_tally'
+
+
+class CompletedElection(models.Model):
+    id = models.IntegerField(primary_key=True)
+    # id = models.OneToOneField(
+    #     Election, 
+    #     on_delete=models.CASCADE, 
+    #     primary_key=True, 
+    #     db_column='id'
+    # )
+    title = models.CharField(max_length=255)
+    candidates = models.JSONField(blank=True, null=True)
+    topics = models.JSONField(blank=True, null=True)
+    tally = models.IntegerField()
+
+    class Meta:
+        db_table = 'completed_elections'
+
+    def __str__(self):
+        return self.title
