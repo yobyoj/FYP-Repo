@@ -364,7 +364,7 @@ def handle_Vote(request):
             vote_value = find_voted_subject_by_uuid_and_increment_vote(decrypted_vote)
             print(vote_value)
             
-            #update the EVS table accordingly, set the voter's has_voted to true
+            #update the EVS table accordingly, set the voter's has_voted to a true value
             update_election_voter_status(election_id, 29, 1)
             
             # Return a success response
