@@ -21,7 +21,8 @@ from django.db import IntegrityError
 import logging
 
 from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally, CompletedElection, ArchivedElection
-from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status, retrieve_completed_election_tally
+#from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status, retrieve_completed_election_tally
+from hello.mySQLfuncs import *
 
 
 import os
@@ -253,54 +254,7 @@ def jsonReader(filepath):
 def jsonReader(filePath):
     with open(filePath, 'r') as file:
         return json.load(file)
-
-
-@csrf_exempt
-def loginFunc(request):
-    if request.method == 'POST':
-        try:
-            # Access JSON data from request body
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-            
-            if not username or not password:
-                return JsonResponse({'error': 'Missing username or password', 'username':username, 'password':password}, status=400)
-            
-            check = sql_validateLogin(username, password) 
-            
-            if check == 'deny':
-                return JsonResponse({'RESULT': 'deny'})
-            else:
-                return JsonResponse({'RESULT': check})
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-            
-            
-@csrf_exempt
-def insertAcc(request):
-    if request.method == 'POST':
-        try:
-            # Access JSON data from request body
-            data = json.loads(request.body)
-            usern = data.get('usern')
-            passw = data.get('passw')
-            usert = data.get('usert')
-            frstn = data.get('frstn')
-            lastn = data.get('lastn')
-            dpt = data.get('dpt')
-            
-            if not usern or not passw or not usert:
-                return JsonResponse({'error': 'Missing username or password or usertype', 'username':usern, 'password':passw}, status=400)
-            insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
-            
-            
-            if insert == 'failed':
-                return JsonResponse({'RESULT': 'denied'})
-            else:
-                return JsonResponse({'RESULT': 'success'})
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)    
+          
     
 @csrf_exempt
 def handle_new_election(request):
@@ -725,3 +679,161 @@ def handle_archived_elections(request):
 class DisplayArchivedElections(generics.ListAPIView):
     queryset = ArchivedElection.objects.all()
     serializer_class = ArchivedElectionSerializer
+    
+    
+    
+    
+    
+    
+        
+"""
+---ACC FUNCTIONS---
+"""
+
+@csrf_exempt
+def loginFunc(request):
+    print("loginFUnc started")
+    if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            
+            #catch empty user and pass
+            if not username or not password:
+                return JsonResponse({'error': 'Missing username or password', 'username':username, 'password':password}, status=400)
+            
+            #save result
+            tuplist_result = sql_validateLogin(username, password)
+            
+            print(tuplist_result)
+            
+            #catch failed login
+            if tuplist_result == 'deny':
+                return JsonResponse({'RESULT': 'deny'})
+            else:
+                #procedd with login stuff
+                
+                for x in tuplist_result[0]:
+                    print(x)
+                
+                # token = generate_jwt(
+                #     tuplist_result[0][0], 
+                #     tuplist_result[0][1], 
+                #     tuplist_result[0][2], 
+                #     tuplist_result[0][3], 
+                #     tuplist_result[0][4],
+                #     tuplist_result[0][5]
+                # )
+                
+                
+                
+                # print(f"TOKEN GENERATED IS",token)
+                r = JsonResponse({'message': 'Login successful', 'data': tuplist_result[0]}, status=200)
+                #r.set_cookie('token', token)
+                print(r.headers)
+                print(r.content)
+                return r
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            # Capture the error and traceback
+            error_details = traceback.format_exc()
+            print("An error occurred:", error_details)  # Log the error on the server
+            return JsonResponse({'error': str(e), 'details': error_details}, status=500)
+
+
+@csrf_exempt
+def insertAcc(request):
+    if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            usern = data.get('usern')
+            passw = data.get('passw')
+            usert = data.get('usert')
+            frstn = data.get('frstn')
+            lastn = data.get('lastn')
+            dpt = data.get('dpt')
+            
+            if not usern or not passw or not usert:
+                return JsonResponse({'error': 'Missing username or password or usertype', 'username':usern, 'password':passw}, status=400)
+            insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
+            
+            
+            if insert == 'failed':
+                return JsonResponse({'RESULT': 'denied'})
+            else:
+                return JsonResponse({'RESULT': 'success'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+@csrf_exempt
+def getAccList(request):
+     if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            cond = data.get('cond')
+            
+            result = sql_getAccList(cond)
+            
+            return JsonReponse({'data': result})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+@csrf_exempt
+def delAcc(request):
+     if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            usern = data.get('usern')
+            
+            result = sql_delAcc(usern)
+            
+            if result == False:
+                return JsonResponse({'RESULT': 'db side error'})                    
+            else:
+                return JsonResponse({'RESULT': 'success'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+@csrf_exempt
+def updateAcc(request):
+     if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            usern = data.get('usern')
+            passw = data.get('passw')
+            usert = data.get('usert')
+            frstn = data.get('frstn')
+            lastn = data.get('lastn')
+            dpt = data.get('dpt')
+            
+            result = sql_updateAcc(usern, usert, frstn, lastn, dpt)
+            
+            return JsonReponse({'Result': result})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+@csrf_exempt
+def updateAccPassw(request):
+     if request.method == 'POST':
+        try:
+            # Access JSON data from request body
+            data = json.loads(request.body)
+            usern = data.get('usern')
+            o_passw = data.get('o_passw')
+            n_passw = data.get('n_passw')
+            
+            result = sql_updateAccPassw(usern, o_passw, n_passw)
+            
+            if result == True:
+                return JsonReponse({'Result': result})
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)

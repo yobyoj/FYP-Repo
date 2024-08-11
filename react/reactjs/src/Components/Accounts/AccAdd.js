@@ -16,8 +16,8 @@ function AccAdd() {
     const handleAccAdd = async (event) => {
         event.preventDefault();
         
-        const selectedUsertype = event.target.options.selectedIndex;
-        console.log("Selected usertype:", selectedUsertype);
+        // const selectedUsertype = event.target.options.selectedIndex;
+        // console.log("Selected usertype:", selectedUsertype);
         
         console.log(username +" "+ password +" "+ usertype+" "+dpt)
 
