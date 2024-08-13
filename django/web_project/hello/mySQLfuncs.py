@@ -122,3 +122,20 @@ def update_election_voter_status(electionid, userid):
     """    
     # Execute the query and fetch the results
     sql_sendQuery(query)
+    
+    
+    
+def retrieve_completed_election_tally(electionid):
+    query = f"""
+        SELECT uuid, encrypted_tally FROM encrypted_tally 
+        WHERE election_id = {electionid}        
+    """   
+    
+    results = sql_sendQuery(query)
+    
+    # Process the results
+    if results:
+        return results
+    else:
+        return []
+

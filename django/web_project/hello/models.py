@@ -1,5 +1,6 @@
 # hello/models.py
 from django.db import models
+from django.db.models import JSONField
 
 class Department(models.Model):
     departmentid = models.AutoField(primary_key=True)
@@ -132,21 +133,23 @@ class EncryptedTally(models.Model):
         db_table = 'encrypted_tally'
 
 
+
 class CompletedElection(models.Model):
-    id = models.IntegerField(primary_key=True)
-    # id = models.OneToOneField(
-    #     Election, 
-    #     on_delete=models.CASCADE, 
-    #     primary_key=True, 
-    #     db_column='id'
-    # )
+    completed_election_id = models.AutoField(primary_key=True)
+    election = models.ForeignKey(
+        'Election',  # References the Election model
+        on_delete=models.CASCADE,
+        db_column='election_id'
+    )
     title = models.CharField(max_length=255)
     candidates = models.JSONField(blank=True, null=True)
     topics = models.JSONField(blank=True, null=True)
+    uuid = models.CharField(max_length=36)  # Store UUID as a string (36 characters for a standard UUID)
     tally = models.IntegerField()
 
     class Meta:
         db_table = 'completed_elections'
+        unique_together = ('election', 'uuid')  # Ensures that each (election_id, uuid) pair is unique
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.uuid})"

@@ -20,8 +20,8 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 import logging
 
-from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally
-from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status
+from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally, CompletedElection
+from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status, retrieve_completed_election_tally
 
 
 import os
@@ -599,14 +599,10 @@ def update_election_statuses():
             election.status = 'Completed'
         election.save()
 
-    # Step 2: Check and add ongoing elections to OngoingElection table
-    for election in elections:
+        # Step 2: Check and add ongoing elections to OngoingElection table
         if election.status == 'Ongoing':
-            # Check if the election already exists in OngoingElection table
             ongoing_election_exists = OngoingElection.objects.filter(id=election.id).exists()
-            
             if not ongoing_election_exists:
-                # Add the ongoing election to the OngoingElection table
                 OngoingElection.objects.create(
                     id=election.id,
                     title=election.title,
@@ -620,5 +616,63 @@ def update_election_statuses():
                     voters=election.voters,
                     votersDept=election.votersDept
                 )
+        
+        # Step 3: Check and add completed elections to CompletedElection table
+        if election.status == 'Completed':
+                # Retrieve the encrypted tallies and UUIDs
+                tallies = retrieve_completed_election_tally(election.id)
                 
+                for uuid, encrypted_tally in tallies:
+                    decrypted_tally = decrypt_tally(encrypted_tally)
+                    
+                    # Ensure that each (election_id, uuid) pair is unique
+                    completed_election_exists = CompletedElection.objects.filter(election=election, uuid=uuid).exists()
+                    
+                    if not completed_election_exists:
+                        CompletedElection.objects.create(
+                            election=election,  # Referencing the Election object
+                            title=election.title,
+                            candidates=election.candidates,
+                            topics=election.topics,
+                            uuid=uuid,  # Set the UUID for the CompletedElection
+                            tally=decrypted_tally  # Set the tally based on the retrieved encrypted_tally
+                        )
+
     print('Elections have been updated')
+
+
+    print('Elections have been updated')
+
+
+# def decrypt_tally(encrypted_tally_str, pail_private_key):
+#     # Convert the string back to an EncryptedNumber object
+#     print("Enc tally:", encrypted_tally_str)
+#     encrypted_tally = paillier.EncryptedNumber(pail_private_key.public_key, int(encrypted_tally_str))
+#     print()
+#     print(encrypted_tally)
+#     # Decrypt the tally using the private key
+#     decrypted_tally = pail_private_key.decrypt(encrypted_tally)
+#     print("Dec tally:", decrypted_tally)
+#     return decrypted_tally
+
+def decrypt_tally(encrypted_tally_str):
+    try:
+        # Convert the string back to an EncryptedNumber object
+        print("Encrypted tally (string):", encrypted_tally_str)
+        
+        # Assuming the encrypted_tally_str is a string representation of an integer
+        encrypted_tally_int = int(encrypted_tally_str)
+        
+        # Create the EncryptedNumber object
+        encrypted_tally = paillier.EncryptedNumber(pail_public_key, encrypted_tally_int)
+        print("Encrypted tally (object):", encrypted_tally)
+        
+        # Decrypt the tally using the private key
+        decrypted_tally = pail_private_key.decrypt(encrypted_tally)
+        print("Decrypted tally:", decrypted_tally)
+        
+        return decrypted_tally
+    
+    except Exception as e:
+        print(f"An error occurred during decryption: {e}")
+        return None
