@@ -179,9 +179,9 @@ const fetchPaillierPublicKey = async () => {
         console.error('Paillier public key not available');
         return null;
     }
-    // Assuming the 'name' field is what you want to encrypt
+    // Assuming the 'uuid' field is what you want to encrypt
     const uuidToEncrypt = voteData.subject.uuid;
-    // Convert the name to a BigInt by hashing it
+    // Convert the uuid to a BigInt by hashing it
     const plaintextBigInt = convertUuidToBigInt(uuidToEncrypt);
     // Explicitly ensure the Paillier encryption operates on BigInts
     try {
