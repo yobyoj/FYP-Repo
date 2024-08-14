@@ -390,13 +390,14 @@ def get_user_elections(request):
         userid = request.GET.get('userid')
         update_election_statuses() 
         load_tallies_from_db()
-
+        userid_int = int(userid)
+        
         # Get elections with their statuses
-        elections = get_ongoing_user_elections_with_status(userid)
+        elections = get_ongoing_user_elections_with_status(userid_int)
         election_serializer = OngoingElectionSerializer(elections, many=True)
 
         # Get voter status for each election
-        voter_statuses = ElectionVoterStatus.objects.filter(user__userid=userid)
+        voter_statuses = ElectionVoterStatus.objects.filter(user__userid=userid_int)
         voter_status_serializer = ElectionVoterStatusSerializer(voter_statuses, many=True)
 
         # Create a map from the serialized data
@@ -611,27 +612,30 @@ def update_election_statuses():
         
         # Step 3: Check and add completed elections to CompletedElection table
         if election.status == 'Completed':
-                # Retrieve the encrypted tallies and UUIDs
-                tallies = retrieve_completed_election_tally(election.id)
-                
-                for uuid, encrypted_tally in tallies:
-                    #decrypted_tally = decrypt_tally(encrypted_tally)
-                    deserialized_tally = deserialize_encrypted_number(encrypted_tally)
-                    decrypted_tally = pail_private_key.decrypt(deserialized_tally)
-                    actual_value = decrypted_tally - 1
+            #Delete the respective ongoing election
+            OngoingElection.objects.filter(id=election.id).delete()
+            
+            # Retrieve the encrypted tallies and UUIDs
+            tallies = retrieve_completed_election_tally(election.id)
+            
+            for uuid, encrypted_tally in tallies:
+                #decrypted_tally = decrypt_tally(encrypted_tally)
+                deserialized_tally = deserialize_encrypted_number(encrypted_tally)
+                decrypted_tally = pail_private_key.decrypt(deserialized_tally)
+                actual_value = decrypted_tally - 1
 
-                    # Ensure that each (election_id, uuid) pair is unique
-                    completed_election_exists = CompletedElection.objects.filter(election=election, uuid=uuid).exists()
-                    
-                    if not completed_election_exists:
-                        CompletedElection.objects.create(
-                            election=election,  # Referencing the Election object
-                            title=election.title,
-                            candidates=election.candidates,
-                            topics=election.topics,
-                            uuid=uuid,  # Set the UUID for the CompletedElection
-                            tally=actual_value  # Set the tally based on the retrieved encrypted_tally
-                        )
+                # Ensure that each (election_id, uuid) pair is unique
+                completed_election_exists = CompletedElection.objects.filter(election=election, uuid=uuid).exists()
+                
+                if not completed_election_exists:
+                    CompletedElection.objects.create(
+                        election=election,  # Referencing the Election object
+                        title=election.title,
+                        candidates=election.candidates,
+                        topics=election.topics,
+                        uuid=uuid,  # Set the UUID for the CompletedElection
+                        tally=actual_value  # Set the tally based on the retrieved encrypted_tally
+                    )
 
     print('Elections have been updated')
     
