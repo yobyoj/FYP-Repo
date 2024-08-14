@@ -1,22 +1,56 @@
+/* Container for the election results */
 .em-election-results {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Changed to column to stack elements vertically */
+    gap: 20px; /* Space between BarChart and other elements */
     align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
 }
 
+/* Styling for candidates section */
 .em-election-results-candidates {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Styling for each candidate/vote pair */
+.candidate-vote-pair {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 15px 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
 }
 
+/* Adding space between name and votes */
+.candidate-vote-pair div {
+    margin: 0 10px;
+}
+
+/* Last candidate/vote pair should not have a bottom border */
+.candidate-vote-pair:last-child {
+    border-bottom: none;
+}
+
+/* Styling for winner announcement */
 .em-election-results-candidates-winner {
     text-align: center;
     font-size: large;
     font-weight: bolder;
+    margin-top: 20px;
+    background-color: #e0ffe0;
+    border: 1px solid #b2d8b2;
+    border-radius: 8px;
+    padding: 10px;
+    color: #4caf50;
 }
 
+/* Styling for vote statistics section */
 .em-election-results-vote-statistics {
     display: flex;
     justify-content: space-between;
@@ -24,20 +58,45 @@
     margin: 15px 15px;
 }
 
+/* Archive button container */
 .archive {
     display: flex;
     justify-content: center;
     align-items: center;
-    
+    margin-top: 20px; /* Added space above the button */
 }
-.archive-button{
+
+/* Styling for the archive button */
+.archive-button {
     padding: 8px 16px;
     background-color: #6200EE;
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 4px;
-    align-items: center;
     height: 45px;
     width: auto;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.archive-button:hover {
+    background-color: #3700B3; /* Darker purple on hover */
+}
+
+/* Styling for winner announcement */
+.winner-announcement {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #7bdb7b;
+    border: 1px solid #b2d8b2;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #3e413e;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ensure the div takes full width of the container */
 }

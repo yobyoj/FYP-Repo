@@ -5,7 +5,7 @@ from .utilities import vote_handling
 import traceback
 import json
 from hello.acc.jsonFuncs import jsonReader
-from .serializer import ElectionSerializer, OngoingElectionSerializer
+from .serializer import ElectionSerializer, OngoingElectionSerializer, CompletedElectionSerializer
 from rest_framework import generics
 from datetime import datetime
 import pytz
@@ -404,6 +404,10 @@ class DisplayElections(generics.ListAPIView):
     queryset = Election.objects.all()
     serializer_class = ElectionSerializer
 
+class DisplayCompletedElections(generics.ListAPIView):
+    queryset = CompletedElection.objects.all()
+    serializer_class = CompletedElectionSerializer
+    
 @csrf_exempt
 def delete_election(request, id):
     if request.method == 'DELETE':
@@ -656,16 +660,4 @@ def update_election_statuses():
                         )
 
     print('Elections have been updated')
-
-
-# def decrypt_tally(encrypted_tally_str, pail_private_key):
-#     # Convert the string back to an EncryptedNumber object
-#     print("Enc tally:", encrypted_tally_str)
-#     encrypted_tally = paillier.EncryptedNumber(pail_private_key.public_key, int(encrypted_tally_str))
-#     print()
-#     print(encrypted_tally)
-#     # Decrypt the tally using the private key
-#     decrypted_tally = pail_private_key.decrypt(encrypted_tally)
-#     print("Dec tally:", decrypted_tally)
-#     return decrypted_tally
 

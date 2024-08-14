@@ -20,6 +20,7 @@ function Dashboard() {
             userid: '29',
           },
         });
+        console.log(response.data.elections);
         setPendingElection(response.data.elections);
       } catch (err) {
         setError(err.message);

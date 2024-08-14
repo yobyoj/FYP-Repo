@@ -144,9 +144,9 @@ function ElectionManagerDashboard() {
 
         {elections.filter(election => election.status === 'Completed').map(election => (
           <button 
-            key={election.id} 
-            className="election-item" 
-            onClick={navigateCompleted}
+          key={election.id} 
+          className="election-item" 
+          onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
           >
             <div>{election.title}</div>
             <div>{election.status}</div>
