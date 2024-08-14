@@ -664,6 +664,9 @@ def handle_archived_elections(request):
                 timezone=timezone
             )
             
+            election.status = 'Archived'
+            election.save()
+            
             # Delete the corresponding record from the CompletedElection table
             CompletedElection.objects.filter(election_id=election.id).delete()
          

@@ -52,6 +52,7 @@ class Election(models.Model):
         ('Scheduled', 'Scheduled'),
         ('Completed', 'Completed'),
         ('Ongoing', 'Ongoing'),
+        ('Archived', 'Archived'), 
     ]
 
     ELECTION_TYPE_CHOICES = [

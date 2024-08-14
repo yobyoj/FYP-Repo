@@ -12,7 +12,6 @@ function Header() {
 
     const cookieData = document.cookie
     const sessionData = cookieData.split(',');
-    console.log("Usertype is ", sessionData[0])
 
     return (
         <header className={styles.header}>
