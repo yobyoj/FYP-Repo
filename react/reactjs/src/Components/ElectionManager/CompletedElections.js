@@ -47,9 +47,33 @@ function CompletedElections() {
         return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     }
 
-    const handleNavigate = () => {
-        navigate('/election-manager/archived-elections');
+    const handleArchive = async () => {
+        try {
+            // Define the payload for the archive request
+            const archivePayload = {
+                election_id: election.id,
+                title: election.title,
+                description: election.description,
+                start_date: election.startDate,
+                end_date: election.endDate,
+                timezone: election.timezone,
+                // Add any other fields that need to be archived
+            };
+    
+            // Send the POST request to the API to create a record in the archivedElections table
+            const response = await axios.post('http://127.0.0.1:8000/api/archived-elections/', archivePayload);
+    
+            if (response.status === 201) {
+                // Navigate to the archived elections page after successful archival
+                navigate('/election-manager/archived-elections');
+            } else {
+                console.error('Failed to archive the election:', response.status);
+            }
+        } catch (error) {
+            console.error('Error archiving the election:', error);
+        }
     };
+    
 
     const chartData = selectedRecords.flatMap((record, recordIndex) => {
         if (record.candidates && record.candidates.length > 0) {
@@ -145,7 +169,7 @@ function CompletedElections() {
                             <br /><br /><br />
                         </div>
                         <div className='archive'>
-                            <button className='archive-button' onClick={handleNavigate}>Archive</button>
+                            <button className='archive-button' onClick={handleArchive}>Archive</button>
                         </div>
                     </main>
                 </div>

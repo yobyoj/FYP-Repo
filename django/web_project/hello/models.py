@@ -153,3 +153,19 @@ class CompletedElection(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.uuid})"
+
+
+class ArchivedElection(models.Model):
+    archived_election_id = models.AutoField(primary_key=True)
+    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    startDate = models.DateTimeField()
+    endDate = models.DateTimeField()
+    timezone = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        db_table = 'archived_elections'
+
+    def __str__(self):
+        return f"{self.title} (Archived)"

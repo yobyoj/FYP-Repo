@@ -1,10 +1,13 @@
-import React from 'react';
+import './ArchivedElections.css';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
-import './ArchivedElections.css';
+import axios from 'axios';
 
 function ArchivedElections() {    
+    const [elections, setElections] = useState([]); // All elections
     const navigate = useNavigate();
+
     const handleNavigate = (data) =>{
         navigate('/election-manager/' + data);
     }
@@ -12,6 +15,37 @@ function ArchivedElections() {
     const searchbarStyle = {
         width: '35%',
     }
+
+    useEffect(() => {
+        fetchElections();
+    }, []);
+
+    const fetchElections = async () => {
+        try {
+          console.log('Fetching elections...');
+          const response = await axios.get('http://127.0.0.1:8000/api/view-archived-elections/');
+          console.log('Fetched data:', response.data);
+          setElections(response.data);
+        } catch (error) {
+          console.error('Error fetching election data:', error);
+        }
+    };  
+
+    const formatDate = (dateString, timezone) => {
+        const date = new Date(dateString);
+        const options = {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          timeZone: timezone,
+          timeZoneName: 'short',
+        };
+    
+        return new Intl.DateTimeFormat('en-US', options).format(date);
+      };
 
     return(
         <>
@@ -27,17 +61,24 @@ function ArchivedElections() {
                 
                 <div className="election-item-titles">
                 <div><u>Election Name</u></div>
-                <div><u>Status</u></div>
+                <div><u>Timezone</u></div>
                 <div><u>Start Date</u></div>
                 <div><u>End Date</u></div>
                 </div>
 
-                <button onClick={()=>handleNavigate('completed-election')} className="election-item">
-                <div>Election Title 3</div>
-                <div>Completed</div>
-                <div>04/04/2024 8am</div>
-                <div>10/04/2024 8am</div>
-                </button>
+                {elections.map(election => (
+                    <button 
+                        key={election.id} 
+                        className="election-item" 
+                        onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
+                    >
+                        <div>{election.title}</div>
+                        <div>{election.timezone}</div>
+                        <div>{formatDate(election.startDate, election.timezone)}</div>
+                        <div>{formatDate(election.endDate, election.timezone)}</div>
+                        {/* <div>Start Date: {election.startDate} / End Date: {election.endDate}</div> */}
+                    </button>
+                ))}
 
             </main>
             </div>

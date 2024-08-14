@@ -1,6 +1,6 @@
 from django.urls import path
 from hello import views
-from .views import handle_new_election, DisplayElections, DisplayCompletedElections, delete_election
+from .views import handle_new_election, DisplayElections, DisplayCompletedElections, DisplayArchivedElections, delete_election
 
 urlpatterns = [
     path('loginFunc/', views.loginFunc, name='login_view'),
@@ -13,5 +13,8 @@ urlpatterns = [
     path('api/get_user_elections/', views.get_user_elections, name='get_user_elections'),
     path('api/handle_Vote/', views.handle_Vote, name='handle_Vote'),
     path('api/get_paillier_public_key/', views.get_paillier_public_key, name='get_paillier_public_key'),
+    path('api/archived-elections/', views.handle_archived_elections, name='handle_archived_elections'),
+    path('api/view-archived-elections/', DisplayArchivedElections.as_view(), name="view-archived-elections"),
+    
     
 ]

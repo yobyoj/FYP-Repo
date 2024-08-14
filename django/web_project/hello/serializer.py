@@ -1,7 +1,7 @@
 # serializers.py
 
 from rest_framework import serializers
-from .models import Election, OngoingElection, CompletedElection, ElectionVoterStatus
+from .models import Election, OngoingElection, CompletedElection, ElectionVoterStatus, ArchivedElection
 
 class ElectionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,3 +26,10 @@ class ElectionVoterStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElectionVoterStatus
         fields = ['userid', 'election_id', 'has_voted']
+        
+
+
+class ArchivedElectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArchivedElection
+        fields = '__all__'

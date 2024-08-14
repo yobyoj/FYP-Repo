@@ -5,7 +5,7 @@ from .utilities import vote_handling
 import traceback
 import json
 from hello.acc.jsonFuncs import jsonReader
-from .serializer import ElectionSerializer, OngoingElectionSerializer, CompletedElectionSerializer, ElectionVoterStatusSerializer
+from .serializer import ElectionSerializer, OngoingElectionSerializer, CompletedElectionSerializer, ElectionVoterStatusSerializer, ArchivedElectionSerializer
 from rest_framework import generics
 from datetime import datetime
 import pytz
@@ -20,7 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 import logging
 
-from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally, CompletedElection
+from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally, CompletedElection, ArchivedElection
 from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status, retrieve_completed_election_tally
 
 
@@ -682,4 +682,46 @@ def update_election_statuses():
     print('Elections have been updated')
     
     
-    
+@csrf_exempt
+def handle_archived_elections(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8')) 
+            election_id = data.get('election_id')
+            title = data.get('title')
+            description = data.get('description')
+            start_date = data.get('start_date')
+            end_date = data.get('end_date')
+            timezone = data.get('timezone')
+            
+            # Retrieve the election instance
+            election = Election.objects.get(id=election_id)
+
+            # Create the ArchivedElection record
+            archived_election = ArchivedElection.objects.create(
+                election=election,
+                title=title,
+                description=description,
+                startDate=start_date,
+                endDate=end_date,
+                timezone=timezone
+            )
+
+            # Return a success response
+            return JsonResponse({
+                'message': 'Archived election created successfully!',
+                'archived_election_id': archived_election.archived_election_id
+            }, status=201)
+        
+        except Election.DoesNotExist:
+            return JsonResponse({'error': 'Election not found'}, status=404)
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+
+
+class DisplayArchivedElections(generics.ListAPIView):
+    queryset = ArchivedElection.objects.all()
+    serializer_class = ArchivedElectionSerializer
