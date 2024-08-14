@@ -73,6 +73,7 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
 ##### gab functions
 
 import json
+from django.db import connection
 
 def get_ongoing_user_elections_with_status(userid):
     # Define the SQL query to join election_voter_status with elections for the given userid
@@ -112,16 +113,16 @@ def get_ongoing_user_elections_with_status(userid):
 
 
 
+
 def update_election_voter_status(electionid, userid):
-      # Define the SQL query to join election_voter_status with elections for the given userid
-    query = f"""
+    query = """
         UPDATE election_voter_status
         SET has_voted = TRUE
-        WHERE election_id = {electionid} AND userid = {userid};
-
-    """    
-    # Execute the query and fetch the results
-    sql_sendQuery(query)
+        WHERE election_id = %s AND userid = %s;
+    """
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, [electionid, userid])
     
     
     

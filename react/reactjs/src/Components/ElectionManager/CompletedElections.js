@@ -27,6 +27,9 @@ function CompletedElections() {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/completed-elections/');
             setCompletedElectionList(response.data);
+
+            // Log the completedElectionsList to the console
+            console.log('Completed Elections List:', response.data);
         } catch (error) {
             console.error('Error fetching election data:', error);
         }
@@ -45,7 +48,7 @@ function CompletedElections() {
     }
 
     const handleNavigate = () => {
-        navigate('/election-manager/');
+        navigate('/election-manager/archived-elections');
     };
 
     const chartData = selectedRecords.flatMap((record, recordIndex) => {

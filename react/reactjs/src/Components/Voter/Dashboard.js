@@ -20,16 +20,23 @@ function Dashboard() {
             userid: '29',
           },
         });
-        console.log(response.data.elections);
-        setPendingElection(response.data.elections);
+  
+        const allElections = response.data.elections;
+  
+        // Filter elections into pending and processing categories
+        const pending = allElections.filter(election => !election.has_voted);
+        const processing = allElections.filter(election => election.has_voted);
+  
+        setPendingElection(pending);
+        setProcessingElection(processing);
       } catch (err) {
         setError(err.message);
       }
     };
-
+  
     fetchElections();
   }, []);
-
+  
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -71,6 +78,7 @@ function Dashboard() {
       <div className="voter-main-content">
         <Sidebar />
         <div className="voter-content">
+          {/* Pending Elections Section */}
           <div className="voter-elections-section">
             <div className="voter-election-section-header">
               <h2>Pending Elections</h2>
@@ -81,9 +89,9 @@ function Dashboard() {
                 value={searchTerm}
               />
             </div>
-
+  
             {error && <div>Error: {error}</div>}
-
+  
             <div className="voter-elections-list">
               {filteredElections.map(election => (
                 <div key={election.id} className="voter-election">
@@ -94,18 +102,16 @@ function Dashboard() {
                     <div>Start Date: {formatDate(election.startDate, election.timezone)}</div>
                     <div>End Date: {formatDate(election.endDate, election.timezone)}</div>
                     <div>Timezone: {election.timezone} </div>
-                    {/* <div>Start Date: {election.startDate} / End Date: {election.endDate} </div> */}
                   </div>
                   <div className="voter-election-deadline">
                     <button onClick={() => handleVote(election.id)}>Vote</button>
-                    {/* <button onClick={() => handleVote(election.id)}>Vote</button> */}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* PROCESSING ELECTIONS */}
+  
+          {/* Processing Elections Section */}
           <div className="voter-elections-section">
             <h2>Processing Elections</h2>
             <div className="voter-elections-list">
@@ -116,9 +122,7 @@ function Dashboard() {
                       <span><b><u>{election.title}</u></b></span>
                     </div>
                     <div>Start Date: {formatDate(election.startDate, election.timezone)}</div>
-                  </div>
-                  <div className="voter-election-deadline">
-                  <div>End Date: {formatDate(election.endDate, election.timezone)}</div>
+                    <div>End Date: {formatDate(election.endDate, election.timezone)}</div>
                   </div>
                 </div>
               ))}
@@ -128,6 +132,6 @@ function Dashboard() {
       </div>
     </div>
   );
-}
+}  
 
 export default Dashboard;

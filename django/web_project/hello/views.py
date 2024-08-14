@@ -5,7 +5,7 @@ from .utilities import vote_handling
 import traceback
 import json
 from hello.acc.jsonFuncs import jsonReader
-from .serializer import ElectionSerializer, OngoingElectionSerializer, CompletedElectionSerializer
+from .serializer import ElectionSerializer, OngoingElectionSerializer, CompletedElectionSerializer, ElectionVoterStatusSerializer
 from rest_framework import generics
 from datetime import datetime
 import pytz
@@ -434,13 +434,32 @@ def delete_election(request, id):
 def get_user_elections(request):
     if request.method == 'GET':
         userid = request.GET.get('userid')
-        update_election_statuses() ###########################################################to delete once the cron jobs is up 
-        load_tallies_from_db() #####################################retrieve the encrypted tallies records and populate it into the global encrypted_tallies dictionary. 
-                               #####################################location for calling this function to be reviewed
+        update_election_statuses() 
+        load_tallies_from_db()
+
+        # Get elections with their statuses
         elections = get_ongoing_user_elections_with_status(userid)
-        serializer = OngoingElectionSerializer(elections, many=True)
-        return Response({'elections': serializer.data}, status=status.HTTP_200_OK)
+        election_serializer = OngoingElectionSerializer(elections, many=True)
+
+        # Get voter status for each election
+        voter_statuses = ElectionVoterStatus.objects.filter(user__userid=userid)
+        voter_status_serializer = ElectionVoterStatusSerializer(voter_statuses, many=True)
+
+        # Create a map from the serialized data
+        status_map = {status['election_id']: status for status in voter_status_serializer.data}
+
+        # Combine the data
+        combined_data = []
+        for election in election_serializer.data:
+            election_id = election['id']
+            # Append the voter status to the election data
+            election['userid'] = status_map.get(election_id, {}).get('userid', None)
+            election['has_voted'] = status_map.get(election_id, {}).get('has_voted', None)
+            combined_data.append(election)
+
+        return Response({'elections': combined_data}, status=status.HTTP_200_OK)
     return Response({'error': 'Invalid HTTP method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
   
   
 def verify_signature_with_public_key(encrypted_vote_data, digital_signature, public_key_pem):
@@ -502,10 +521,11 @@ def handle_Vote(request):
             
             map_uuid_to_subject_in_ongoing_election()
             vote_value = find_voted_subject_by_uuid_and_increment_vote(election_id, decrypted_vote)
-            print(vote_value)
+            print("Vote value:", vote_value)
+            election_id_int = int(election_id)
             
             #update the EVS table accordingly, set the voter's has_voted to a true value
-            update_election_voter_status(election_id, 29)
+            update_election_voter_status(election_id_int, 29)
             
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
@@ -660,4 +680,6 @@ def update_election_statuses():
                         )
 
     print('Elections have been updated')
-
+    
+    
+    
