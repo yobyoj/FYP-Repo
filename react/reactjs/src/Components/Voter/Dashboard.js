@@ -39,8 +39,8 @@ function Dashboard() {
     const sessionData = cookieData.split(',');
 
     // Extract the numeric value from the first element
-    const userIdString = sessionData[0]; // This will be "sessionData=10"
-    const userId = userIdString.split('=')[1]; // This extracts "10"
+    const userIdString = sessionData[0]; // This will be "sessionData=xx"
+    const userId = userIdString.split('=')[1]; // This extracts "xx"
     console.log(userId)
 
     fetchElections();

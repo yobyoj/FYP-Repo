@@ -8,7 +8,6 @@ import forge from 'node-forge';
 import * as paillierBigint from 'paillier-bigint';
 
 
-
 function Voting() {
   // State for various modals
   const [showRulesModal, setShowRulesModal] = useState(true);
@@ -24,7 +23,10 @@ function Voting() {
 
   const cookieData = document.cookie
   const sessionData = cookieData.split(',');
-  //userID is sessionData[1]
+
+  // Extract the numeric value from the first element
+  const userIdString = sessionData[0]; 
+  const userId = userIdString.split('=')[1]; 
 
   // State to store generated RSA keys
   const [keys, setKeys] = useState({ publicKey: '', privateKey: '' });
@@ -59,7 +61,7 @@ function Voting() {
   const handleCloseRulesModal = () => {
     setShowRulesModal(false);
   };
-
+  
 
 
 /***************to delete***/
@@ -246,7 +248,7 @@ const fetchPaillierPublicKey = async () => {
     const encryptedVoteData = encryptVoteData(voteData);
     const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
 
-    submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id, sessionData[1]);
+    submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id, userId);
     console.log('after submitting the vote, the signature is: ', digitalSignature);
     setShowVoteModal(false);
     setShowFinalModal(true);
