@@ -26,6 +26,8 @@ function NewHeader() {
 
   }
 
+  const cookieData = document.cookie
+  const sessionData = cookieData.split(',');
 
   return (
     <div className="header">
@@ -35,7 +37,7 @@ function NewHeader() {
         </Link>
       </div>
       <div className="user-section">
-        <span style={userStylization}>Hello, Gabriel Chung - IT Dept</span>
+        <span style={userStylization}>Hello, {sessionData[2]} {sessionData[3]} - {sessionData[4]} Dept</span>
       </div>
     </div>
   );
