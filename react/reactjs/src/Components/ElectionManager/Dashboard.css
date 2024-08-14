@@ -111,19 +111,45 @@
 }
 
 
-/**** For pagination ****/
-.pagination {
+.completed-search-bar-column {
   display: flex;
-  justify-content: center;
-  padding: 20px;
+  align-items: center;  
+  padding: 0px,10px;       
+  gap: 10px;           
+  margin-bottom: 20px;
+  
 }
 
-.pagination button {
-  background-color: transparent; 
-  border: none; 
-  color: #333; 
-  font-size: 16px; 
-  padding: 8px 12px; 
+.completed-search-bar-column input{
+  padding: 8px;         
+  border: 2px solid #ccc; 
+  border-radius: 4px;   
+  font-size: 16px;   
+}
+
+.completed-search-bar-column > button {
   cursor: pointer;
-  transition: color 0.3s;
+  padding: 10px 30px;
+  background-color: #ffffff;  
+  color: #a376e2;             
+  border: 2px solid #a376e2;  
+  border-radius: 8px;
+  font-size: 16px;           
+  font-weight: bold;   
+  height: 40px;
+  width: 120px;   
+  
+}
+
+
+.completed-search-bar-column > button:hover {
+  background-color: #6200EE; 
+  color: #ffffff;            
+}
+
+.completed-elections-border {
+  display: flex;
+  align-items: center;  
+  justify-content: space-between;
+  
 }

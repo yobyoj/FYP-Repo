@@ -7,9 +7,11 @@ import axios from 'axios';
 function ElectionManagerDashboard() {
   const [elections, setElections] = useState([]); // All elections
   const [filteredElections, setFilteredElections] = useState([]); // Elections according to search criteria
+  const [filteredCompletedElections, setFilteredCompletedElections] = useState([]); // Filtered completed elections
   const navigate = useNavigate();
   const [filterState, setFilterState] = useState("All");
   const [searchBar, setSearchBar] = useState("");
+  const [completedSearchBar, setCompletedSearchBar] = useState("");
 
   useEffect(() => {
     fetchElections();
@@ -21,6 +23,11 @@ function ElectionManagerDashboard() {
       election.status === 'Scheduled' || election.status === 'Ongoing'
     );
     setFilteredElections(filtered);
+
+    const completedFiltered = elections.filter(election => 
+      election.status === 'Completed'
+    );
+    setFilteredCompletedElections(completedFiltered);
   }, [elections]);
 
   const fetchElections = async () => {
@@ -32,11 +39,7 @@ function ElectionManagerDashboard() {
     } catch (error) {
       console.error('Error fetching election data:', error);
     }
-  };  
-  // ternary operator
-  // filters the elections based on the filterState, if the statement filterState === 'All' is true then
-  // the elections will filter to display both scheduled and ongoing elections, and also whereby the value in the search bar exists in the election title 
-  // else it will display the elections whose status matches the filter state, along with the search criteria
+  };
 
   const handleSearch = () => {
     const filtered = filterState === 'All'
@@ -49,6 +52,14 @@ function ElectionManagerDashboard() {
           election.title.toLowerCase().includes(searchBar.toLowerCase())
         );
     setFilteredElections(filtered);
+  };
+
+  const handleCompletedSearch = () => {
+    const filtered = elections.filter(election => 
+      election.status === 'Completed' &&
+      election.title.toLowerCase().includes(completedSearchBar.toLowerCase())
+    );
+    setFilteredCompletedElections(filtered);
   };
 
   const formatDate = (dateString, timezone) => {
@@ -84,9 +95,8 @@ function ElectionManagerDashboard() {
       <Header />
 
       <div className="dashboard">
-        
         <div className="dashboardText">Dashboard</div>
-        
+
         <div className="search-bar-column">
           <input 
             type="text" 
@@ -127,14 +137,27 @@ function ElectionManagerDashboard() {
             <div>{election.timezone}</div>
             <div>{formatDate(election.startDate, election.timezone)}</div>
             <div>{formatDate(election.endDate, election.timezone)}</div>
-            {/* <div>Start Date: {election.startDate} / End Date: {election.endDate}</div> */}
           </button>
         ))}
 
         <br />
-        <div className="dashboardText"><span>Completed Elections</span></div>
+        <br />
+
+        <div className="completed-elections-border">
+          <div className="dashboardText"><span>Completed Elections</span></div>
+
+          <div className="completed-search-bar-column">
+            <input 
+              type="text" 
+              placeholder="Search completed elections by title" 
+              value={completedSearchBar} 
+              onChange={(e) => setCompletedSearchBar(e.target.value)}
+            />
+            <button className='completed-search-bar-button' onClick={handleCompletedSearch}>Search</button>
+          </div>
+        </div>
         
-        <div className="election-item-titles">
+          <div className="election-item-titles">
           <div><u>Election Name</u></div>
           <div><u>Status</u></div>
           <div><u>Timezone</u></div>
@@ -142,11 +165,11 @@ function ElectionManagerDashboard() {
           <div><u>End Date</u></div>
         </div>
 
-        {elections.filter(election => election.status === 'Completed').map(election => (
+        {filteredCompletedElections.map(election => (
           <button 
-          key={election.id} 
-          className="election-item" 
-          onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
+            key={election.id} 
+            className="election-item" 
+            onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
           >
             <div>{election.title}</div>
             <div>{election.status}</div>

@@ -29,6 +29,11 @@ function Dashboard() {
   
         setPendingElection(pending);
         setProcessingElection(processing);
+
+        const cookieData = document.cookie
+        const sessionData = cookieData.split(',');
+        console.log("User id is ", sessionData[0])
+
       } catch (err) {
         setError(err.message);
       }
