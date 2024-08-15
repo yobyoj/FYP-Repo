@@ -1,16 +1,31 @@
 import React, { useState } from "react";
-import { v4 as uuidv4 } from 'uuid'; // Import the uuid library
+import { v4 as uuidv4 } from 'uuid';
+import DOMPurify from 'dompurify'; 
 import './TopicsModal.css';
 
 function TopicsModal({ isOpen, onClose, onSave }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
+
+    const sanitizeInput = (input) => {
+        const trimmedInput = input.trim(); 
+        const sanitizedInput = DOMPurify.sanitize(trimmedInput); // Sanitize HTML input
+        return sanitizedInput;
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Sanitize the inputs
+        const sanitizedName = sanitizeInput(name);
+        const sanitizedDescription = sanitizeInput(description);
         const uuid = uuidv4(); // Generate a UUID for the topic
-        onSave({ name, description, uuid }); // Pass the new topic object to the onSave function
-        onClose();
+        
+
+        onSave({ name: sanitizedName, description: sanitizedDescription, uuid });
+        
+        onClose(); // Close the modal
     };
 
     if (!isOpen) return null;
