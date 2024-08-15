@@ -10,6 +10,9 @@ function Header() {
         navigate(location);
     }
 
+    const cookieData = document.cookie
+    const sessionData = cookieData.split(',');
+
     return (
         <header className={styles.header}>
             <div className={styles.logoContainer}>
@@ -19,7 +22,7 @@ function Header() {
             </div>
             <div className={styles.navContainer}>
                 <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/')}>Logout</button>
-                <div className={`${styles.headerText} ${styles.navItem}`}>Election Manager 1</div>
+                <div className={`${styles.headerText} ${styles.navItem}`}> {sessionData[1]}</div>
             </div>
         </header>
     );

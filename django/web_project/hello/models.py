@@ -52,6 +52,7 @@ class Election(models.Model):
         ('Scheduled', 'Scheduled'),
         ('Completed', 'Completed'),
         ('Ongoing', 'Ongoing'),
+        ('Archived', 'Archived'), 
     ]
 
     ELECTION_TYPE_CHOICES = [
@@ -157,7 +158,7 @@ class CompletedElection(models.Model):
 
 class ArchivedElection(models.Model):
     archived_election_id = models.AutoField(primary_key=True)
-    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    election_id = models.IntegerField()  
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     startDate = models.DateTimeField()

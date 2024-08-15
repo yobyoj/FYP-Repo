@@ -8,7 +8,6 @@ import forge from 'node-forge';
 import * as paillierBigint from 'paillier-bigint';
 
 
-
 function Voting() {
   // State for various modals
   const [showRulesModal, setShowRulesModal] = useState(true);
@@ -21,6 +20,13 @@ function Voting() {
   const navigate = useNavigate();
   const location = useLocation();
   const election = location.state.election;
+
+  const cookieData = document.cookie
+  const sessionData = cookieData.split(',');
+
+  // Extract the numeric value from the first element
+  const userIdString = sessionData[0]; 
+  const userId = userIdString.split('=')[1]; 
 
   // State to store generated RSA keys
   const [keys, setKeys] = useState({ publicKey: '', privateKey: '' });
@@ -55,7 +61,7 @@ function Voting() {
   const handleCloseRulesModal = () => {
     setShowRulesModal(false);
   };
-
+  
 
 
 /***************to delete***/
@@ -200,7 +206,7 @@ const fetchPaillierPublicKey = async () => {
 
 
 /*********************Function to submit the vote *********************/
-  const submitVote = async (voteData, publicKey, digitalSignature, electionid) => {
+  const submitVote = async (voteData, publicKey, digitalSignature, electionid, userid) => {
     try {
       const response = await fetch('http://localhost:8000/api/handle_Vote/', {
         method: 'POST',
@@ -211,7 +217,8 @@ const fetchPaillierPublicKey = async () => {
           voteData, 
           publicKey,
           digitalSignature,
-          electionid
+          electionid,
+          userid
         }),
       });
       const result = await response.json();
@@ -223,33 +230,33 @@ const fetchPaillierPublicKey = async () => {
   
 
   
-/******************Function to confirm and submit the vote **************/
-const handleConfirmVote = () => {
+  /******************Function to confirm and submit the vote **************/
+  const handleConfirmVote = () => {
 
-  if (!keys.publicKey) {
-    console.error('Public key not available');
-    return;
-  }
+    if (!keys.publicKey) {
+      console.error('Public key not available');
+      return;
+    }
 
-  // Collect the vote data
-  const voteData = {
-    subject: selectedSubject,
-    //candidate : name, email, role, description
-    //topic: name, description
+    // Collect the vote data
+    const voteData = {
+      subject: selectedSubject,
+      //candidate : name, email, role, description
+      //topic: name, description
+    };
+
+    const encryptedVoteData = encryptVoteData(voteData);
+    const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
+
+    submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id, userId);
+    console.log('after submitting the vote, the signature is: ', digitalSignature);
+    setShowVoteModal(false);
+    setShowFinalModal(true);
+
+    setTimeout(() => {
+      navigate('/voter/', { replace: true });
+    }, 3000);
   };
-
-  const encryptedVoteData = encryptVoteData(voteData);
-  const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
-
-  submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id);
-  console.log('after submitting the vote, the signature is: ', digitalSignature);
-  setShowVoteModal(false);
-  setShowFinalModal(true);
-
-  setTimeout(() => {
-    navigate('/voter/', { replace: true });
-  }, 3000);
-};
 
 
   return (

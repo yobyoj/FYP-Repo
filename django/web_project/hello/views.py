@@ -155,7 +155,7 @@ def load_tallies_from_db():
 
         # Debug: Decrypt and print the tally to verify integrity
         decrypted_tally = pail_private_key.decrypt(encrypted_tally)
-        print(f"Loaded tally from DB for election {election_id}, UUID {uuid_str}: Encrypted: {encrypted_tally_str}, Decrypted: {decrypted_tally}")
+        print(f"Loaded tally from DB for election {election_id}, UUID {uuid_str}, Decrypted: {decrypted_tally}")
 
         if election_id not in encrypted_tallies:
             encrypted_tallies[election_id] = {}
@@ -378,12 +378,6 @@ def delete_election(request, id):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-# @csrf_exempt
-# def delete_election_voter_status(election):
-#     """Helper function to delete all ElectionVoterStatus records related to an election."""
-#     ElectionVoterStatus.objects.filter(election=election).delete()
-
-
 @api_view(['GET'])
 def get_user_elections(request):
     if request.method == 'GET':
@@ -445,8 +439,8 @@ def handle_Vote(request):
             signature = data.get('digitalSignature')
             election_id = data.get('electionid')
 
-            #user_id = data.get('userid') #user id, dervied from session
-            
+            user_id = data.get('userid') #user id, dervied from session
+            user_id_int = int(user_id)
             
             print("Signature:", signature)
             print("Public Key:", rsa_public_key_data)
@@ -479,7 +473,7 @@ def handle_Vote(request):
             election_id_int = int(election_id)
             
             #update the EVS table accordingly, set the voter's has_voted to a true value
-            update_election_voter_status(election_id_int, 29)
+            update_election_voter_status(election_id_int, user_id_int)
             
             # Return a success response
             return JsonResponse({'status': 'success', 'message': 'Vote submitted successfully'})
@@ -608,30 +602,35 @@ def update_election_statuses():
                     voters=election.voters,
                     votersDept=election.votersDept
                 )
-        
-        # Step 3: Check and add completed elections to CompletedElection table
-        if election.status == 'Completed':
-                # Retrieve the encrypted tallies and UUIDs
-                tallies = retrieve_completed_election_tally(election.id)
-                
-                for uuid, encrypted_tally in tallies:
-                    #decrypted_tally = decrypt_tally(encrypted_tally)
-                    deserialized_tally = deserialize_encrypted_number(encrypted_tally)
-                    decrypted_tally = pail_private_key.decrypt(deserialized_tally)
-                    actual_value = decrypted_tally - 1
 
-                    # Ensure that each (election_id, uuid) pair is unique
-                    completed_election_exists = CompletedElection.objects.filter(election=election, uuid=uuid).exists()
+        # Step 3: Check and add completed elections to CompletedElection table
+        if election.status == 'Completed':              
+            # Retrieve the encrypted tallies and UUIDs
+            tallies = retrieve_completed_election_tally(election.id)
+            
+            for uuid, encrypted_tally in tallies:
+                #decrypted_tally = decrypt_tally(encrypted_tally)
+                deserialized_tally = deserialize_encrypted_number(encrypted_tally)
+                decrypted_tally = pail_private_key.decrypt(deserialized_tally)
+                actual_value = decrypted_tally - 1
+
+                # Ensure that each (election_id, uuid) pair is unique
+                completed_election_exists = CompletedElection.objects.filter(election=election, uuid=uuid).exists()
+                
+                if not completed_election_exists:
+                    CompletedElection.objects.create(
+                        election=election,  # Referencing the Election object
+                        title=election.title,
+                        candidates=election.candidates,
+                        topics=election.topics,
+                        uuid=uuid,  # Set the UUID for the CompletedElection
+                        tally=actual_value  # Set the tally based on the retrieved encrypted_tally
+                    )
                     
-                    if not completed_election_exists:
-                        CompletedElection.objects.create(
-                            election=election,  # Referencing the Election object
-                            title=election.title,
-                            candidates=election.candidates,
-                            topics=election.topics,
-                            uuid=uuid,  # Set the UUID for the CompletedElection
-                            tally=actual_value  # Set the tally based on the retrieved encrypted_tally
-                        )
+            
+            # Step 4: Delete the election from the OngoingElection table
+            OngoingElection.objects.filter(id=election.id).delete()
+
 
     print('Elections have been updated')
     
@@ -648,19 +647,36 @@ def handle_archived_elections(request):
             end_date = data.get('end_date')
             timezone = data.get('timezone')
             
+            # Ensure all required fields are present
+            if not election_id or not title or not start_date or not end_date:
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
             # Retrieve the election instance
             election = Election.objects.get(id=election_id)
 
             # Create the ArchivedElection record
             archived_election = ArchivedElection.objects.create(
-                election=election,
+                election_id=election.id,  # Use election_id since it's no longer a FK
                 title=title,
                 description=description,
                 startDate=start_date,
                 endDate=end_date,
                 timezone=timezone
             )
-
+            
+            election.status = 'Archived'
+            election.save()
+            
+            # Delete the corresponding record from the CompletedElection table
+            CompletedElection.objects.filter(election_id=election.id).delete()
+         
+            # Delete the related encrypted tallies from the currently Ongoing elections
+            EncryptedTally.objects.filter(election_id=election.id).delete()
+            
+            # Delete the related EVS table records
+            ElectionVoterStatus.objects.filter(election_id=election.id).delete()      
+            
+            
             # Return a success response
             return JsonResponse({
                 'message': 'Archived election created successfully!',

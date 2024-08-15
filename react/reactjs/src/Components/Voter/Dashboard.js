@@ -17,7 +17,7 @@ function Dashboard() {
       try {
         const response = await axios.get('http://localhost:8000/api/get_user_elections', {
           params: {
-            userid: '29',
+            userid: userId,
           },
         });
   
@@ -29,11 +29,20 @@ function Dashboard() {
   
         setPendingElection(pending);
         setProcessingElection(processing);
+
       } catch (err) {
         setError(err.message);
       }
     };
-  
+
+    const cookieData = document.cookie;
+    const sessionData = cookieData.split(',');
+
+    // Extract the numeric value from the first element
+    const userIdString = sessionData[0]; // This will be "sessionData=xx"
+    const userId = userIdString.split('=')[1]; // This extracts "xx"
+    console.log(userId)
+
     fetchElections();
   }, []);
   

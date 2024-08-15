@@ -128,9 +128,7 @@ function CompletedElections() {
 
                             <div className="form-group">
                                 <label htmlFor="timezone">Timezone</label>
-                                <select id="timezone" name="timezone" value={election.timezone} disabled>
-                                    {/* Add your timezone options here */}
-                                </select>
+                                <input type="text" id="timezone" name="timezone" value={election.timezone} disabled />
                             </div>
 
                             <br />
