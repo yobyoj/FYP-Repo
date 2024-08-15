@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import './LoginForm.css'; // Import the CSS file for styling
+import './LoginForm.css';
 
 const LoginForm2 = () => {
   const [username, setUsername] = useState('');
@@ -45,7 +45,7 @@ const LoginForm2 = () => {
         console.log("Usertype is ", sessionData[5])
         nav(sessionData[5])
       } else {
-        console.error('Login failed');
+        alert('Login failed. Please enter the correct Username and Password');
       }
     } catch (error) {
       console.error('Error during login:', error);

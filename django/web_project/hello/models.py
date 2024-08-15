@@ -78,7 +78,8 @@ class Election(models.Model):
         db_table = 'elections'
 
     def __str__(self):
-        return self.title
+        #return self.title
+        return self
 
 class OngoingElection(models.Model):
     ELECTION_TYPE_CHOICES = [

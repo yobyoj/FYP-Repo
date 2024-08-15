@@ -1,0 +1,41 @@
+.header {
+    display: flex;
+    align-items: center; /* Align items vertically center */
+    padding: 1rem; /* Use rem units for padding */
+    background-color: #ffffff;
+    justify-content: space-between; /* Distribute space between items */
+    border-bottom: 3px solid rgb(172, 171, 171);
+}
+
+.logo {
+    width: 5rem; /* Use rem units for width */
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+    margin-left: 1rem; /* Use rem units for margin */
+}
+
+.headerText {
+    font-size: 1rem; /* Use rem units for font size */
+    margin-left: 1rem; /* Use rem units for margin */
+    margin-right: 0.5rem; /* Use rem units for margin */
+}
+
+.noStyleButton {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    font-size: 1rem; /* Use rem units for font size */
+}
+
+.navContainer {
+    display: flex;
+    align-items: center;
+}
+
+.navItem {
+    margin-left: 2rem; /* Use rem units for spacing between nav items */
+}

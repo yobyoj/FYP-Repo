@@ -367,6 +367,7 @@ def delete_election(request, id):
     if request.method == 'DELETE':
         try:
             election = Election.objects.get(id=id)
+            print(election)
             election.delete()
             # delete_election_voter_status(election)
             

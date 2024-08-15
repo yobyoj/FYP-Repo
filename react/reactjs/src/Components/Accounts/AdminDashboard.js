@@ -1,92 +1,187 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Logout from "./Logout";
-import LoginForm from './LoginForm'; 
-import AccMng from './AccMng';
-import AdminElectionResults from "./AdminElectionResults";
-
-import NewHeader from './NewHeader';
-import Sidebar from './Sidebar';
-//import './AdminDashboard.css';
+import React, { useState, useEffect } from 'react';
+import './AdminDashboard.css';
+import Header from './Header';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function AdminDashboard() {
-  return (
-    <div className="voter-app-container">
-      <NewHeader />
-      <div className="voter-main-content">
-        <Sidebar />
-        <div className="voter-content">
-          <div className="voter-elections-section">
-            <h2>Pending Elections</h2>
-            <div className="voter-elections-list">
-              <div className="voter-election">
-                <div className="voter-election-info">
-                  <div>
-                    <div><span><b><u>Election 1</u></b></span></div>
-                    <div>Election Manager - xxx</div>
-                  </div>
-                  
-                  <div className="voter-election-deadline">
-                    <div>Start Date: 31 Dec</div>
-                    <div>Deadline: 1st Jan</div>
-                  </div>
-                  <button>Delete</button>
-                </div>
-              </div>
-              <div className="voter-election">
-                <div className="voter-election-info">
-                  <div>
-                    <div><span><b><u>Election 2</u></b></span></div>
-                  </div>
+  const [elections, setElections] = useState([]); // All elections
+  const [filteredElections, setFilteredElections] = useState([]); // Elections according to search criteria
+  const [filteredCompletedElections, setFilteredCompletedElections] = useState([]); // Filtered completed elections
+  const navigate = useNavigate();
+  const [filterState, setFilterState] = useState("All");
+  const [searchBar, setSearchBar] = useState("");
+  const [completedSearchBar, setCompletedSearchBar] = useState("");
 
-                  <div className="voter-election-deadline">
-                    <div>Deadline: 2nd Jan 2024</div>
-                  </div>
-                  <button>Delete</button>
-                </div>
-              </div>
-              <div className="voter-election">
-                <div className="voter-election-info">
-                <div><span><b><u>Election 3</u></b></span></div>
-                  <div className="voter-election-deadline">
-                    <div>Deadline: 3rd Jan 2024</div>
-                  </div>
-                  <button>Delete</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="voter-elections-section">
-            <h2>Completed Elections</h2>
-            <div className="voter-elections-list">
-              <div className="voter-election">
-                <div className="voter-election-info">
-                  <div>
-                    <div><span><b><u>Election 4</u></b></span></div>
-                    <div>Election Manager: yyy</div>
-                  </div>
-                
-                  <div className="voter-election-deadline">
-                    <div>Completed Date: 15 Dec</div>
-                  </div>
-                </div>
-              </div>
-              <div className="voter-election">
-                <div className="voter-election-info">
-                <div><span><b><u>Election 5</u></b></span></div>
-                  <div className="voter-election-deadline">
-                    <div>Completed Date: 25 Dec</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  useEffect(() => {
+    fetchElections();
+  }, []);
+
+  useEffect(() => {
+    // Filter elections to show only 'Scheduled' and 'Ongoing' initially
+    const filtered = elections.filter(election => 
+      election.status === 'Scheduled' || election.status === 'Ongoing'
+    );
+    setFilteredElections(filtered);
+
+    const completedFiltered = elections.filter(election => 
+      election.status === 'Completed'
+    );
+    setFilteredCompletedElections(completedFiltered);
+  }, [elections]);
+
+  const fetchElections = async () => {
+    try {
+      console.log('Fetching elections...');
+      const response = await axios.get('http://127.0.0.1:8000/api/elections/');
+      console.log('Fetched data:', response.data);
+      setElections(response.data);
+    } catch (error) {
+      console.error('Error fetching election data:', error);
+    }
+  };
+
+  const handleSearch = () => {
+    const filtered = filterState === 'All'
+      ? elections.filter(election => 
+          (election.status === 'Scheduled' || election.status === 'Ongoing') &&
+          election.title.toLowerCase().includes(searchBar.toLowerCase())
+        )
+      : elections.filter(election => 
+          election.status === filterState && 
+          election.title.toLowerCase().includes(searchBar.toLowerCase())
+        );
+    setFilteredElections(filtered);
+  };
+
+  const handleCompletedSearch = () => {
+    const filtered = elections.filter(election => 
+      election.status === 'Completed' &&
+      election.title.toLowerCase().includes(completedSearchBar.toLowerCase())
+    );
+    setFilteredCompletedElections(filtered);
+  };
+
+  const formatDate = (dateString, timezone) => {
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZone: timezone,
+      timeZoneName: 'short',
+    };
+
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+  };
+
+  function handleNewElection() {
+    navigate('/election-manager/election-details');
+  }
+
+  function navigateCompleted() {
+    navigate('/election-manager/completed-election');
+  }
+
+  function navigateArchived() {
+    navigate('/election-manager/archived-elections');
+  }
+
+  return (
+    <>
+      <Header />
+
+      <div className="dashboard">
+        <div className="dashboardText">Dashboard</div>
+
+        <div className="search-bar-column">
+          <input 
+            type="text" 
+            placeholder="Search by election title" 
+            value={searchBar} 
+            onChange={(e) => setSearchBar(e.target.value)}
+          /> 
+          <select 
+            className='filter' 
+            value={filterState} 
+            onChange={(e) => setFilterState(e.target.value)}
+          >
+            <option value="All">All</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Scheduled">Scheduled</option>
+          </select>
+          <button className='search-bar-button' onClick={handleSearch}>Search</button>
+          <button onClick={navigateArchived}>Archived Elections</button>
+          <button onClick={handleNewElection}>New Election</button>
+        </div>
+
+        <div className="election-item-titles">
+          <div><u>Election Name</u></div>
+          <div><u>Status</u></div>
+          <div><u>Timezone</u></div>
+          <div><u>Start Date</u></div>
+          <div><u>End Date</u></div>
+        </div>
+
+        {filteredElections.map(election => (
+          <button 
+            key={election.id} 
+            className="election-item" 
+            onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
+          >
+            <div>{election.title}</div>
+            <div>{election.status}</div>
+            <div>{election.timezone}</div>
+            <div>{formatDate(election.startDate, election.timezone)}</div>
+            <div>{formatDate(election.endDate, election.timezone)}</div>
+          </button>
+        ))}
+
+        <br />
+        <br />
+
+        <div className="completed-elections-border">
+          <div className="dashboardText"><span>Completed Elections</span></div>
+
+          <div className="completed-search-bar-column">
+            <input 
+              type="text" 
+              placeholder="Search completed elections by title" 
+              value={completedSearchBar} 
+              onChange={(e) => setCompletedSearchBar(e.target.value)}
+            />
+            <button className='completed-search-bar-button' onClick={handleCompletedSearch}>Search</button>
           </div>
         </div>
+        
+          <div className="election-item-titles">
+          <div><u>Election Name</u></div>
+          <div><u>Status</u></div>
+          <div><u>Timezone</u></div>
+          <div><u>Start Date</u></div>
+          <div><u>End Date</u></div>
+        </div>
+
+        {filteredCompletedElections.map(election => (
+          <button 
+            key={election.id} 
+            className="election-item" 
+            onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
+          >
+            <div>{election.title}</div>
+            <div>{election.status}</div>
+            <div>{election.timezone}</div>
+            <div>{formatDate(election.startDate, election.timezone)}</div>
+            <div>{formatDate(election.endDate, election.timezone)}</div>
+          </button>
+        ))}
+
       </div>
-    </div>
+    </>
   );
 }
 
-  
-  export default AdminDashboard;
- 
+export default AdminDashboard;
