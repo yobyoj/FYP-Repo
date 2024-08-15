@@ -780,7 +780,10 @@ def getAccList(request):
             
             result = sql_getAccList(cond)
             
-            return JsonReponse({'data': result})
+            if result:
+                return JsonResponse({'data': result})
+            else:
+                return JsonResponse({'data': []})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
@@ -790,7 +793,9 @@ def delAcc(request):
         try:
             # Access JSON data from request body
             data = json.loads(request.body)
-            usern = data.get('usern')
+            usern = data.get('username')
+            
+            print(f"ACC DEL REQUEST RECIEVED. ATTEMPTING DELETION. USERNAME IS {usern}")
             
             result = sql_delAcc(usern)
             

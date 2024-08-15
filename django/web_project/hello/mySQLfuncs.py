@@ -67,21 +67,25 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
     
     
 def sql_getAccList(cond):
-    q = f"SELECT * FROM user_accounts"
+    q = f"SELECT userid, username, firstname, lastname, department, usertype FROM user_accounts"
     if cond != "":
-        q = q + f"WHERE username LIKE WHERE username LIKE '%{cond}%';"
+        q = q + f" WHERE username LIKE '%{cond}%';"
               
     r = sql_sendQuery(q)
     
     if r:
         return r
     else: 
-        return "SEL STATEMENT FAILED"
+        return []
 
 def sql_delAcc(usern):
-    q = f"DELETE FROM user_accounts WHERE username = {usern};"
+    print(f"ATTEMPTING ACC DELETING. USERNAME IS {usern}")
+    q = f"DELETE FROM user_accounts WHERE username = '{usern}'"
+    
+    print("QUERY STATEMENT IS:  "+q)
     r = sql_sendQuery(q)
-    q = f"SELECT username FROM user_accounts WHERE username = {usern};"
+    
+    q = f"SELECT username FROM user_accounts WHERE username = '{usern}';"
     result = sql_sendQuery(q)
         
     if not result:

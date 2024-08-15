@@ -1,35 +1,134 @@
+import React, { useState, useEffect } from 'react';
 import './LoginForm.css';
 import './AccListDel.css';
-//import Header from './Header';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import React, { useState } from 'react'; // Only useState needed
 
-const accountsData = require('./accounts.json'); // Import data synchronously
 
-function AccListEdit() {
-  const [data, setData] = useState(accountsData); // Set initial data from import
 
-  // Function to create table rows based on data
+const GetAccList = async (cond) => {
+  try {
+    const response = await fetch('http://localhost:8000/getAccList/', {
+      method: 'POST',
+      body: JSON.stringify({ cond: cond }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    console.log(data.data);
+    return data.data; // Assuming the data is in the 'data' property of the response
+  } catch (error) {
+    console.error('Error fetching account list:', error);
+    return []; // Return an empty array if there's an error
+  }
+};
+
+
+const DeleteAccount = async (usern) => {
+  try {
+    console.log("SENDING ACC DEL RESPONCE TO BACKEND. USERNAME IS ", usern)
+    const response = await fetch('http://localhost:8000/delAcc/', {
+      method: 'POST',
+      body: JSON.stringify({ username: usern }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+    return result.RESULT; // Assuming the backend returns a 'success' field to indicate success/failure
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return false;
+  }
+};
+
+function AccListDel() {
+  const [cond, setCond] = useState(''); // Cond initialized as an empty string
+  const [data, setData] = useState([]); // State to store fetched data
+  const [searchTerm, setSearchTerm] = useState(''); // State to store the search input
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await GetAccList(cond); // Fetch data using the condition
+      setData(result);
+    };
+
+    fetchData();
+  }, [cond]); // Refetch data whenever the condition changes
+
+  const handleSearch = () => {
+    setCond(searchTerm); // Update cond when the search button is clicked
+  };
+
   const createTR = (item) => (
-    <tr key={item.id}> {/* Assuming "id" property for unique key */}
-      {/* Access data properties within the loop and display them in table cells */}
-      <td>{item.email}</td>
-      <td>{item.dpt}</td>
-      <td><button class="Del"> DELETE </button></td>  {/* Assuming "pw" exists for password */}
-      {/* Add more table cells for other properties */}
-    </tr>
+  <tr key={item ? item[0] : null}> {/* Use key only if item exists */}
+    {item ? (
+      <>
+        <td>{item[1]}</td>
+        <td>{item[2]}</td>
+        <td>{item[3]}</td>
+        <td>{item[4]}</td>
+        <td>{item[5]}</td>
+        <td><button className="delBtn" onClick={() => handleDelete(item[1])}>DELETE</button></td>
+      </>
+    ) : (
+      <td colSpan="6">No Data Found</td>
+    )}
+  </tr>
   );
-
+  const handleDelete = async (username) => {
+    const confirmed = window.confirm('Are you sure you want to delete this account?');
+    if (confirmed) {
+      const success = await DeleteAccount(username);
+      if (success) {
+        alert('Account successfully deleted.');
+        setData(data.filter((item) => item[0] !== username)); // Remove the deleted item from the state
+        setCond("")
+      } else {
+        alert('Failed to delete account.');
+      }
+    }
+  };
+  
   return (
     <div>
-      <table class="spaced-table">
+      <div className="searchCont">
+        <table className="searchCont">
+        <tbody>
+          <tr>
+            {/* Search bar cell */}
+            <td>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm as the user types
+                placeholder="Search by condition..."
+                className="searchBar"
+              />
+            </td>
+            {/* Search button cell */}
+            <td>
+              <button onClick={handleSearch} className="searchBtn">
+                Search
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      
+      
+      
+      <table className="space-table">
         <thead>
           <tr>
-            <th>Email</th>
+            <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
             <th>Department</th>
-            <th>Delete</th>  {/* Assuming "pw" exists for password */}
-            {/* Add headers for other properties */}
+            <th>User Type</th>
+            <th>Delete Password</th>
           </tr>
         </thead>
         <tbody>
@@ -37,7 +136,7 @@ function AccListEdit() {
             data.map(createTR)
           ) : (
             <tr>
-              <td colSpan="4">No data found</td> {/* Adjust colspan for number of columns */}
+              <td colSpan="6">No data found</td>
             </tr>
           )}
         </tbody>
@@ -46,5 +145,10 @@ function AccListEdit() {
   );
 }
 
-export default AccListEdit;
+export default AccListDel;
+
+
+
+
+
 

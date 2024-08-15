@@ -1,38 +1,81 @@
+import React, { useState, useEffect } from 'react';
 import './LoginForm.css';
 import './AccListEdit.css';
-//import Header from './Header';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import React, { useState } from 'react'; // Only useState needed
 
-const accountsData = require('./accounts.json'); // Import data synchronously
+const GetAccList = async (cond) => {
+  try {
+    const response = await fetch('http://localhost:8000/getAccList/', {
+      method: 'POST',
+      body: JSON.stringify({ cond: cond }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    console.log(data.data);
+    return data.data; // Assuming the data is in the 'data' property of the response
+  } catch (error) {
+    console.error('Error fetching account list:', error);
+    return []; // Return an empty array if there's an error
+  }
+};
 
 function AccListEdit() {
-  const [data, setData] = useState(accountsData); // Set initial data from import
-  
-  //console.log("DATATYPE OF DATA?", typeof(data))
-  //console.log("DATA IS ARRAY?", Array.isArray(data))
+  const [cond, setCond] = useState(''); // Cond initialized as an empty string
+  const [data, setData] = useState([]); // State to store fetched data
+  const [searchTerm, setSearchTerm] = useState(''); // State to store the search input
 
-  // Function to create table rows based on data
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await GetAccList(cond); // Fetch data using the condition
+      setData(result);
+    };
+
+    fetchData();
+  }, [cond]); // Refetch data whenever the condition changes
+
+  const handleSearch = () => {
+    setCond(searchTerm); // Update cond when the search button is clicked
+  };
+
   const createTR = (item) => (
-    <tr key={item.id}> {/* Assuming "id" property for unique key */}
-      {/* Access data properties within the loop and display them in table cells */}
-      <td>{item.email}</td>
-      <td>{item.dpt}</td>
-      <td><button class="Edit"> RESET PASSWORD </button></td>  {/* Assuming "pw" exists for password */}
-      {/* Add more table cells for other properties */}
+    <tr key={item[0]}> {/* Assuming "id" property for unique key */}
+      <td>{item[1]}</td>
+      <td>{item[2]}</td>
+      <td>{item[3]}</td>
+      <td>{item[4]}</td>
+      <td>{item[5]}</td>
+      <td><button className="Edit">RESET PASSWORD</button></td>
+      <td><button className="Edit">EDIT DETAILS</button></td>
     </tr>
   );
 
+    console.log("THIS IS THE DATA ", data)
   return (
     <div>
-      <table class="space-table">
+      <div>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm as the user types
+          placeholder="Search by condition..."
+        />
+        <button onClick={handleSearch}>Search</button>
+      </div>
+      
+      
+      
+      <table className="space-table">
         <thead>
           <tr>
-            <th>Email</th>
+            <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
             <th>Department</th>
-            <th>Password</th>  {/* Assuming "pw" exists for password */}
-            {/* Add headers for other properties */}
+            <th>User Type</th>
+            <th>Reset Password</th>
+            <th>Edit Details</th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +83,7 @@ function AccListEdit() {
             data.map(createTR)
           ) : (
             <tr>
-              <td colSpan="4">No data found</td> {/* Adjust colspan for number of columns */}
+              <td colSpan="6">No data found</td>
             </tr>
           )}
         </tbody>
@@ -50,4 +93,9 @@ function AccListEdit() {
 }
 
 export default AccListEdit;
+
+
+
+
+
 

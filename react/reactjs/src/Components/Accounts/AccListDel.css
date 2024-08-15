@@ -50,4 +50,37 @@
 }
 
 
+/* Search bar */
+.searchBar {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex-grow: 1; /* Make the search bar flexible and fill available space */
+}
 
+/* Search button */
+.searchBtn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.searchCont {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; /* Make the container span the full width of the table */
+  margin-bottom: 10px;
+}
+
+.delBtn {
+  padding: 10px 20px;
+  background-color: #DD5555;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+}
