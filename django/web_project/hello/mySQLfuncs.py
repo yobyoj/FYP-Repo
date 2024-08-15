@@ -93,12 +93,21 @@ def sql_delAcc(usern):
     else: 
         return False
         
-def sql_updateAcc(usern, usert, firstn, lastn, dpt):
-    q = f"UPDATE user_accounts SET usertype = '{usert}', firstname = '{firstn}', lastname = '{lastn}', department = '{dpt}' WHERE username = '{usern}';"
+def sql_updateAcc(usern, usert, frstn, lastn, dpt):
+    print(f"Username is {usern}")
+    print(f"Firstanme is {frstn}")
+    print(f"LASTNAME IS {lastn}")
+    print(f"DEPRAT IS {dpt}")
+    print(f"USERT IS {usert}")
+    
+    q = f"UPDATE user_accounts SET usertype = '{usert}', firstname = '{frstn}', lastname = '{lastn}', department = '{dpt}' WHERE username = '{usern}';"
     r = sql_sendQuery(q)
     
-    q = f"SELECT username FROM user_accounts WHERE usertype = '{usert}' AND firstname = '{firstn}' AND lastname = '{lastn}' AND department = '{dpt}' AND username = '{usern}';"
+    print(r)
+    
+    q = f"SELECT username FROM user_accounts WHERE usertype = '{usert}' AND firstname = '{frstn}' AND lastname = '{lastn}' AND department = '{dpt}';"
     result = sql_sendQuery(q)
+    print(result)
     
     if result:
         print(result)

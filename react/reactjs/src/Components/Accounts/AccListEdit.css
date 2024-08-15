@@ -1,49 +1,80 @@
-/* AccListEdit.css*/
+/* AccListEdit.css */
 
-
-
-.space-table {
+.spaced-table {
   width: 120%; /* Optional: Set table width to 100% of its container */
-  border-collapse: collapse; 
+  border-collapse: collapse; /* Optional: Collapse table borders */
 }
 
-.space-table th {
+.spaced-table th {
   padding: 10px; /* Adjust padding for table headings */
-  text-align: center; 
-  background-color: #f0f0f0; 
+  text-align: center; /* Optional: Align text in the center of each heading */
+  background-color: #f0f0f0; /* Optional: Set background color for headings */
 }
 
-.space-table th:nth-child(1) {
-  width: 40%; 
+.spaced-table th:nth-child(1) {
+  width: 40%; /* Set width for the first heading */
 }
 
-.space-table th:nth-child(2) {
-  width: 40%; 
+.spaced-table th:nth-child(2) {
+  width: 40%; /* Set width for the second heading */
 }
 
-.space-table th:nth-child(3) {
-  width: 40%; 
+.spaced-table th:nth-child(3) {
+  width: 40%; /* Set width for the third heading */
 }
 
-.space-table th {
+.spaced-table th {
   background-color: #f2f2f2;
 }
 
-.space-table th:nth-child(even) {
+.spaced-table th:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-.Edit {
-  padding: 10px 30px; 
-  font-size: 12px; 
-  background-color: transparent; /* Transparent background */
-  color: hsl(0, 0%, 6%); 
-  border: none; 
-  border-bottom: 1px solid transparent; /* Initially transparent bottom border */
-  text-decoration: none; /* Remove default text decoration */
-  cursor: pointer; /* Change cursor to pointer on hover */
-  transition: border-color 0.3s ease; /* Smooth transition for border color */
-  text-align: center; 
-  vertical-align: middle;
-  background-color: #f1a2a2;
+
+
+
+.edtBtn { /* Style for "Edit Details" button */
+  padding: 10px 20px;
+  background-color: #CA0; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
+
+.rstBtn { /* Style for "Reset Password" button */
+  padding: 10px 20px;
+  background-color: #55f; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Search bar */
+.searchBar {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex-grow: 1; /* Make the search bar flexible and fill available space */
+}
+
+/* Search button */
+.searchBtn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.searchCont {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; /* Make the container span the full width of the table */
+  margin-bottom: 10px;
+}
+
+

@@ -828,16 +828,18 @@ def updateAcc(request):
         try:
             # Access JSON data from request body
             data = json.loads(request.body)
-            usern = data.get('usern')
-            passw = data.get('passw')
-            usert = data.get('usert')
-            frstn = data.get('frstn')
-            lastn = data.get('lastn')
-            dpt = data.get('dpt')
+            usern = data.get('username')
+            #passw = data.get('passw')
+            usert = data.get('usertype')
+            frstn = data.get('firstname')
+            lastn = data.get('lastname')
+            dpt = data.get('department')
+            
+            print(f"UPDATE ACC TRIGGERED. DATA RECIEVED IS {usern} {frstn} {lastn} {dpt} {usert}")
             
             result = sql_updateAcc(usern, usert, frstn, lastn, dpt)
             
-            return JsonReponse({'Result': result})
+            return JsonResponse({'Result': result})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
