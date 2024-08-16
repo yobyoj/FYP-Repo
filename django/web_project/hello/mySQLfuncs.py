@@ -29,7 +29,7 @@ def sql_sendQuery(q):
         return result
         
     except pymysql.Error as e:
-        print("Error:", e)
+        #print("Error:", e)
     finally:
         cursor.close()
         connection.close()
@@ -61,7 +61,7 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
     #q="INSERT INTO z_testTable (co1) VALUES ('aaa')"
     
     insert = sql_sendQuery(q)
-    print(insert)
+    #print(insert)
     
     q = f"SELECT * FROM user_accounts WHERE username = '{usern}' AND password ='{passw}' "
     result = sql_sendQuery(q)
@@ -85,10 +85,10 @@ def sql_getAccList(cond):
         return []
 
 def sql_delAcc(usern):
-    print(f"ATTEMPTING ACC DELETING. USERNAME IS {usern}")
+    #print(f"ATTEMPTING ACC DELETING. USERNAME IS {usern}")
     q = f"DELETE FROM user_accounts WHERE username = '{usern}'"
     
-    print("QUERY STATEMENT IS:  "+q)
+    #print("QUERY STATEMENT IS:  "+q)
     r = sql_sendQuery(q)
     
     q = f"SELECT username FROM user_accounts WHERE username = '{usern}';"
@@ -100,23 +100,23 @@ def sql_delAcc(usern):
         return False
         
 def sql_updateAcc(usern, usert, frstn, lastn, dpt):
-    print(f"Username is {usern}")
-    print(f"Firstanme is {frstn}")
-    print(f"LASTNAME IS {lastn}")
-    print(f"DEPRAT IS {dpt}")
-    print(f"USERT IS {usert}")
+    #print(f"Username is {usern}")
+    #print(f"Firstanme is {frstn}")
+    #print(f"LASTNAME IS {lastn}")
+    #print(f"DEPRAT IS {dpt}")
+    #print(f"USERT IS {usert}")
     
     q = f"UPDATE user_accounts SET usertype = '{usert}', firstname = '{frstn}', lastname = '{lastn}', department = '{dpt}' WHERE username = '{usern}';"
     r = sql_sendQuery(q)
     
-    print(r)
+    #print(r)
     
     q = f"SELECT username FROM user_accounts WHERE usertype = '{usert}' AND firstname = '{frstn}' AND lastname = '{lastn}' AND department = '{dpt}';"
     result = sql_sendQuery(q)
-    print(result)
+    #print(result)
     
     if result:
-        print(result)
+        #print(result)
         return result
     else: 
         return "UPD STATEMENT FAILED"
@@ -131,7 +131,7 @@ def sql_updateAccPassw(usern, o_passw, n_passw):
     
     
         if result:
-            print(result)
+            #print(result)
             return True
         else: 
             return "UPD STATEMENT FAILED"
@@ -140,8 +140,8 @@ def sql_getDptList():
     q = f"SELECT departmentname FROM departments;"
     result = sql_sendQuery(q)
     
-    print("SEDB result is: ")
-    print(result)
+    #print("SEDB result is: ")
+    #print(result)
     
     if result:
         return result

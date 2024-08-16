@@ -16,7 +16,7 @@ function Header() {
     return (
         <header className={styles.header}>
             <div className={styles.logoContainer}>
-                <Link to="/election-manager/">
+                <Link to="/System-Admin/">
                     <img src={companyLogo} alt="Company Logo" className={styles.logo} />
                 </Link>
             </div>
@@ -26,7 +26,7 @@ function Header() {
             
                 <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/system-admin/AccMng')}>     Account Managment     </button>
                 
-                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/')}>Logout</button>
+                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/logout/')}>Logout</button>
                 
                 <div className={`${styles.headerText} ${styles.navItem}`}> {sessionData[1]}</div>
             </div>

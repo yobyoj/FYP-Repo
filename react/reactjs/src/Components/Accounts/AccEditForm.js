@@ -28,7 +28,7 @@ function AccEditForm({ user, onClose }, ) {
 
       const result = await response.json();
       
-      console.log(result.Result)
+      //console.log(result.Result)
       
       if (result.Result) {
         alert('RESULT IS', result.Result);
@@ -61,7 +61,7 @@ function AccEditForm({ user, onClose }, ) {
 
             const r = await response.json();
             setDptList(r.Data)
-            console.log(r.Data)
+            //console.log(r.Data)
         } catch (error) {
             console.error('Error:', error.message); // Handle errors appropriately (display error message)
         }

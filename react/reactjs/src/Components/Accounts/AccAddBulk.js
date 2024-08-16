@@ -21,7 +21,7 @@ function AccAddBulk() {
         
         const usernameList = usernames.split('\n'); // Split usernames into an array
         
-        console.log(usernameList);
+        //console.log(usernameList);
 
         try {
           const response = await fetch('http://127.0.0.1:8000/insertAccBulk/', {
@@ -61,7 +61,7 @@ function AccAddBulk() {
 
             const r = await response.json();
             setDptList(r.Data)
-            console.log(r.Data)
+            //console.log(r.Data)
         } catch (error) {
             console.error('Error:', error.message); // Handle errors appropriately (display error message)
         }

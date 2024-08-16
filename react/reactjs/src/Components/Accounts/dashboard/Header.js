@@ -21,7 +21,7 @@ function Header() {
                 </Link>
             </div>
             <div className={styles.navContainer}>
-                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/logout/')}>Logout</button>
+                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/')}>Logout</button>
                 <div className={`${styles.headerText} ${styles.navItem}`}> {sessionData[1]}</div>
             </div>
         </header>

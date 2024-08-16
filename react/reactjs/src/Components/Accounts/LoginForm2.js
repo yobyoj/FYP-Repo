@@ -26,11 +26,11 @@ const LoginForm2 = () => {
       const token = data.token//document.cookie.split('; ').find(row => row.startsWith('token=')).split('=')[1];
       
       
-      console.log("data is ", data)
-      console.log("token is ", token)
-      console.log("message is ",data.message)
-      console.log("error is ",data.error)
-      console.log("Cookie file is ", document.cookie)
+      //console.log("data is ", data)
+      //console.log("token is ", token)
+      //console.log("message is ",data.message)
+      //console.log("error is ",data.error)
+      //console.log("Cookie file is ", document.cookie)
       
       function getCookie(name) {
         const cookieValue = document.cookie.match(name);
@@ -42,7 +42,7 @@ const LoginForm2 = () => {
         
         const cookieData = document.cookie
         const sessionData = cookieData.split(',');
-        console.log("Usertype is ", sessionData[5])
+        //console.log("Usertype is ", sessionData[5])
         nav(sessionData[5])
       } else {
         alert('Login failed. Please enter the correct Username and Password');

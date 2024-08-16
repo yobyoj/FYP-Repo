@@ -70,7 +70,7 @@ def deserialize_encrypted_number(serialized_encrypted_number):
     return pickle.loads(base64.b64decode(serialized_encrypted_number.encode('utf-8')))
 
 def initialize_tally(election_id, candidates, topics):
-    print(f"Initializing tally for election {election_id}")
+    #print(f"Initializing tally for election {election_id}")
 
     try:
         # Initialize encrypted tally for each candidate
@@ -86,9 +86,9 @@ def initialize_tally(election_id, candidates, topics):
                 decrypted_tally = pail_private_key.decrypt(encrypted_tally)
                 
                 # Debug: Print the initial encrypted tally
-                print(f"Initial encrypted tally for candidate {candidate['name']}: {encrypted_tally_str}")
-                print(f"Initialized tally function, decrypted tally is {decrypted_tally}")
-                print()
+                #print(f"Initial encrypted tally for candidate {candidate['name']}: {encrypted_tally_str}")
+                #print(f"Initialized tally function, decrypted tally is {decrypted_tally}")
+                #print()
                 
                 # Store the encrypted tally in the database
                 EncryptedTally.objects.update_or_create(
@@ -110,8 +110,8 @@ def initialize_tally(election_id, candidates, topics):
                 decrypted_tally = pail_private_key.decrypt(encrypted_tally)
                 
                 # Debug: Print the initial encrypted tally
-                print(f"Initial encrypted tally for topic {topic['name']}: {encrypted_tally_str}")
-                print(f"Initialized tally function, decrypted tally is {decrypted_tally}")
+                #print(f"Initial encrypted tally for topic {topic['name']}: {encrypted_tally_str}")
+                #print(f"Initialized tally function, decrypted tally is {decrypted_tally}")
                 
 
                 # Store the encrypted tally in the database
@@ -121,7 +121,7 @@ def initialize_tally(election_id, candidates, topics):
                     defaults={'encrypted_tally': encrypted_tally_str}
                 )
 
-        print(f"Tallies for election {election_id} initialized and stored in the database.")
+        #print(f"Tallies for election {election_id} initialized and stored in the database.")
 
     except IntegrityError as e:
         logging.error(f"Integrity error occurred: {e}. Election ID: {election_id}")
@@ -155,14 +155,14 @@ def load_tallies_from_db():
 
         # Debug: Decrypt and print the tally to verify integrity
         decrypted_tally = pail_private_key.decrypt(encrypted_tally)
-        print(f"Loaded tally from DB for election {election_id}, UUID {uuid_str}, Decrypted: {decrypted_tally}")
+        #print(f"Loaded tally from DB for election {election_id}, UUID {uuid_str}, Decrypted: {decrypted_tally}")
 
         if election_id not in encrypted_tallies:
             encrypted_tallies[election_id] = {}
 
         encrypted_tallies[election_id][uuid_bigint] = encrypted_tally
 
-    print("Tallies loaded from database into the global dictionary.")
+    #print("Tallies loaded from database into the global dictionary.")
 
 
 def increment_vote(electionid, uuid_bigint, increment=1):
@@ -178,7 +178,7 @@ def increment_vote(electionid, uuid_bigint, increment=1):
 
     # Debug: Decrypt and print the current tally
     decrypted_current_tally = pail_private_key.decrypt(current_tally)
-    print(f"Current tally before increment for election_id {electionid}, UUID {uuid_str}: {decrypted_current_tally}")
+    #print(f"Current tally before increment for election_id {electionid}, UUID {uuid_str}: {decrypted_current_tally}")
 
     updated_tally = current_tally + encrypted_increment
     encrypted_tallies[electionid][uuid_bigint] = updated_tally
@@ -186,7 +186,7 @@ def increment_vote(electionid, uuid_bigint, increment=1):
 
     # Debug: Decrypt and print the updated tally
     decrypted_updated_tally = pail_private_key.decrypt(updated_tally)
-    print(f"Updated tally after increment for election_id {electionid}, UUID {uuid_str}: {decrypted_updated_tally}")
+    #print(f"Updated tally after increment for election_id {electionid}, UUID {uuid_str}: {decrypted_updated_tally}")
 
     rows_updated = EncryptedTally.objects.filter(
         election_id=electionid,
@@ -194,9 +194,9 @@ def increment_vote(electionid, uuid_bigint, increment=1):
     ).update(encrypted_tally=updated_tally_str)
 
     if rows_updated > 0:
-        print(f"Successfully updated tally for UUID {uuid_str}.")
+        #print(f"Successfully updated tally for UUID {uuid_str}.")
     else:
-        print(f"Tally update failed for UUID {uuid_str}. No record found to update.")
+        #print(f"Tally update failed for UUID {uuid_str}. No record found to update.")
 
 
 def decrypt_tally(encrypted_tally_str):
@@ -205,17 +205,17 @@ def decrypt_tally(encrypted_tally_str):
         encrypted_tally = paillier.EncryptedNumber(pail_public_key, encrypted_tally_int)
         
         # Debug: Print the encrypted tally before decryption
-        print(f"Decrypting tally: Encrypted: {encrypted_tally_str}")
+        #print(f"Decrypting tally: Encrypted: {encrypted_tally_str}")
 
         decrypted_tally = pail_private_key.decrypt(encrypted_tally)
 
         # Debug: Print the decrypted tally
-        print(f"Decrypted tally: {decrypted_tally}")
+        #print(f"Decrypted tally: {decrypted_tally}")
 
         return decrypted_tally
     
     except Exception as e:
-        print(f"An error occurred during decryption: {e}")
+        #print(f"An error occurred during decryption: {e}")
         return None
 
 
@@ -376,7 +376,7 @@ def add_voters_to_status(election):
                     user = UserAccount.objects.get(username=voter_email, usertype='Voter')
                     ElectionVoterStatus.objects.create(election=election, user=user)
                 except UserAccount.DoesNotExist:
-                    print(f"User with email {voter_email} does not exist or is not a 'Voter'.")
+                    #print(f"User with email {voter_email} does not exist or is not a 'Voter'.")
                     pass
 
     # Add voters by department based on departmentname
@@ -389,12 +389,12 @@ def add_voters_to_status(election):
                     # Filter users by department and check if they are 'Voter' type, excluding candidates
                     users = UserAccount.objects.filter(department=department, usertype='Voter').exclude(username__in=candidate_emails)
                     if not users.exists():
-                        print(f"No 'Voter' users found in department {department_name}.")
+                        #print(f"No 'Voter' users found in department {department_name}.")
                     else:
                         for user in users:
                             ElectionVoterStatus.objects.create(election=election, user=user)
                 except Department.DoesNotExist:
-                    print(f"Department {department_name} does not exist.")
+                    #print(f"Department {department_name} does not exist.")
                     pass
 
 
@@ -489,10 +489,10 @@ def handle_Vote(request):
             user_id = data.get('userid') #user id, dervied from session
             user_id_int = int(user_id)
             
-            print("Signature:", signature)
-            print("Public Key:", rsa_public_key_data)
-            print("Type of RSA Public Key Data:", type(rsa_public_key_data))
-            print("ELECTION ID:", election_id)
+            #print("Signature:", signature)
+            #print("Public Key:", rsa_public_key_data)
+            #print("Type of RSA Public Key Data:", type(rsa_public_key_data))
+            #print("ELECTION ID:", election_id)
             
             
             #verify the signature
@@ -501,22 +501,22 @@ def handle_Vote(request):
             if not is_signature_valid:
                 return JsonResponse({'status': 'error', 'message': 'Invalid digital signature'}, status=400)
             else:
-                print('digital signature has been verified\n')
+                #print('digital signature has been verified\n')
                 
             # Convert the vote string back to an EncryptedNumber
             encrypted_vote = paillier.EncryptedNumber(pail_public_key, int(vote_str))
             # Decrypt the vote
             decrypted_vote = pail_private_key.decrypt(encrypted_vote)
-            print("Decrypted vote:", decrypted_vote)
+            #print("Decrypted vote:", decrypted_vote)
             
-            print(encrypted_tallies)
+            #print(encrypted_tallies)
             if election_id not in encrypted_tallies: #might cause frequent errors if the global tally dictionary is reset
                 return JsonResponse({'status': 'error', 'message': 'Election not found'}, status=404)
-            print()
+            #print()
             
             map_uuid_to_subject_in_ongoing_election()
             vote_value = find_voted_subject_by_uuid_and_increment_vote(election_id, decrypted_vote)
-            print("Vote value:", vote_value)
+            #print("Vote value:", vote_value)
             election_id_int = int(election_id)
             
             #update the EVS table accordingly, set the voter's has_voted to a true value
@@ -588,7 +588,7 @@ def map_uuid_to_subject_in_ongoing_election():
     subject_uuids_dict['candidates'] = candidate_mapping
     subject_uuids_dict['topics'] = topic_mapping
     
-    print('Printing the mapped UUID dictionary:', subject_uuids_dict)
+    #print('Printing the mapped UUID dictionary:', subject_uuids_dict)
 
 
 #Finds the candidate voted for by comparing the bigInt UUIDs and handles the vote incrementation
@@ -599,14 +599,14 @@ def find_voted_subject_by_uuid_and_increment_vote(electionid, uuid):
     for key, uuid_value in subject_uuids_dict['candidates'].items():
         if uuid_value == uuid:
             name, email = key.split(' | ')
-            print("The record voted for is: {'type': 'candidate' , 'name': ", name, "'email':" , email,"}") 
+            #print("The record voted for is: {'type': 'candidate' , 'name': ", name, "'email':" , email,"}") 
             increment_vote(electionid, uuid) #once the relevant candidate has been found, increment the vote count
             return name
     
     # Search in topics
     for topic_name, uuid_value in subject_uuids_dict['topics'].items():
         if uuid_value == uuid:
-            print("The record voted for is: {'type': 'topic' , 'name': ", topic_name, "}") 
+            #print("The record voted for is: {'type': 'topic' , 'name': ", topic_name, "}") 
             increment_vote(electionid, uuid) #once the relevant candidate has been found, increment the vote count
             return topic_name
     
@@ -679,7 +679,7 @@ def update_election_statuses():
             OngoingElection.objects.filter(id=election.id).delete()
 
 
-    print('Elections have been updated')
+    #print('Elections have been updated')
     
     
 @csrf_exempt
@@ -755,7 +755,7 @@ class DisplayArchivedElections(generics.ListAPIView):
 
 @csrf_exempt
 def loginFunc(request):
-    print("loginFUnc started")
+    #print("loginFUnc started")
     if request.method == 'POST':
         try:
             # Access JSON data from request body
@@ -770,7 +770,7 @@ def loginFunc(request):
             #save result
             tuplist_result = sql_validateLogin(username, password)
             
-            print(tuplist_result)
+            #print(tuplist_result)
             
             #catch failed login
             if tuplist_result == 'deny':
@@ -779,13 +779,13 @@ def loginFunc(request):
                 #procedd with login stuff
                 
                 for x in tuplist_result[0]:
-                    print(x)
+                    #print(x)
                 
-                # print(f"TOKEN GENERATED IS",token)
+                # #print(f"TOKEN GENERATED IS",token)
                 r = JsonResponse({'message': 'Login successful', 'data': tuplist_result[0]}, status=200)
                 #r.set_cookie('token', token)
-                print(r.headers)
-                print(r.content)
+                #print(r.headers)
+                #print(r.content)
                 return r
                 
         except json.JSONDecodeError:
@@ -793,7 +793,7 @@ def loginFunc(request):
         except Exception as e:
             # Capture the error and traceback
             error_details = traceback.format_exc()
-            print("An error occurred:", error_details)  # Log the error on the server
+            #print("An error occurred:", error_details)  # Log the error on the server
             return JsonResponse({'error': str(e), 'details': error_details}, status=500)
 
 
@@ -849,7 +849,7 @@ def delAcc(request):
             data = json.loads(request.body)
             usern = data.get('username')
             
-            print(f"ACC DEL REQUEST RECIEVED. ATTEMPTING DELETION. USERNAME IS {usern}")
+            #print(f"ACC DEL REQUEST RECIEVED. ATTEMPTING DELETION. USERNAME IS {usern}")
             
             result = sql_delAcc(usern)
             
@@ -873,7 +873,7 @@ def updateAcc(request):
             lastn = data.get('lastname')
             dpt = data.get('department')
             
-            print(f"UPDATE ACC TRIGGERED. DATA RECIEVED IS {usern} {frstn} {lastn} {dpt} {usert}")
+            #print(f"UPDATE ACC TRIGGERED. DATA RECIEVED IS {usern} {frstn} {lastn} {dpt} {usert}")
             
             result = sql_updateAcc(usern, usert, frstn, lastn, dpt)
             
@@ -903,13 +903,13 @@ def updateAccPassw(request):
 def getDptList(request):
     if request.method == 'POST':
         try:
-            print("getDPTLIST STARTED")
+            #print("getDPTLIST STARTED")
             data = json.loads(request.body)
 
             result = sql_getDptList() #returns tuplist
             
-            print("Result returned with: ")
-            print(result)
+            #print("Result returned with: ")
+            #print(result)
             
             if result:
                 return JsonResponse({'Data': result})
@@ -922,12 +922,12 @@ def getDptList(request):
     
 @csrf_exempt
 def insertAccBulk(request):
-    print("insertAccBULK STARTED")
+    #print("insertAccBULK STARTED")
     unsucList = []
     i=0
     if request.method == 'POST':
         try:
-            print("insertBulk STARTED")
+            #print("insertBulk STARTED")
             data = json.loads(request.body)
             usernList = data.get('usernList', [])
             passw = data.get('passw', '')
@@ -936,21 +936,21 @@ def insertAccBulk(request):
             frstn, lastn = "", ""
             usert = "voter"
             
-            print("PRINTING USERN LIST")
-            print(usernList)
+            #print("PRINTING USERN LIST")
+            #print(usernList)
             
             for usern in usernList:
                 if usern == "":
                     unsucList.append("Empty usrname")
                 else:
                     i=i+1
-                    print(f"LOOPING HHAPPENED THIS MANY TIMES: {i}")
+                    #print(f"LOOPING HHAPPENED THIS MANY TIMES: {i}")
                     insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
                     if insert == 'failed':
                         unsucList.append(usern)
                     elif insert == 'dup':
                         unsucList.append(usern + "already in database")
-            print(f"TOTAL LOOPS IS {i}")
+            #print(f"TOTAL LOOPS IS {i}")
             if not unsucList:
                 return JsonResponse({'Result': unsucList})
             else:
@@ -959,5 +959,5 @@ def insertAccBulk(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            #print(f"Unexpected error: {e}")
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)

@@ -13,7 +13,7 @@ const GetAccList = async (cond) => {
     });
 
     const data = await response.json();
-    console.log(data.data);
+    ////console.log(data.data);
     return data.data; // Assuming the data is in the 'data' property of the response
   } catch (error) {
     console.error('Error fetching account list:', error);
@@ -58,12 +58,12 @@ function AccListEdit() {
     </tr>
   );
 
-    console.log("THIS IS THE DATA ", data)
+    //console.log("THIS IS THE DATA ", data)
 
   const handleEdit = (item) => {
     setSelectedUser(item);
     setIsEditOpen(true);
-    console.log("Dis isEditOopen set to true?", isEditOpen)
+    //console.log("Dis isEditOopen set to true?", isEditOpen)
   };
   
   const handleEditClose = (edited) => { 

@@ -14,7 +14,7 @@ const GetAccList = async (cond) => {
     });
 
     const data = await response.json();
-    console.log(data.data);
+    //console.log(data.data);
     return data.data; // Assuming the data is in the 'data' property of the response
   } catch (error) {
     console.error('Error fetching account list:', error);
@@ -25,7 +25,7 @@ const GetAccList = async (cond) => {
 
 const DeleteAccount = async (usern) => {
   try {
-    console.log("SENDING ACC DEL RESPONCE TO BACKEND. USERNAME IS ", usern)
+    //console.log("SENDING ACC DEL RESPONCE TO BACKEND. USERNAME IS ", usern)
     const response = await fetch('http://localhost:8000/delAcc/', {
       method: 'POST',
       body: JSON.stringify({ username: usern }),

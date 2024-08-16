@@ -4,7 +4,7 @@ import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function AdminDashboard() {
+function ElectionManagerDashboard() {
     const [elections, setElections] = useState([]); // All elections
     const [filteredElections, setFilteredElections] = useState([]); // Elections according to search criteria
     const [filteredCompletedElections, setFilteredCompletedElections] = useState([]); // Filtered completed elections
@@ -34,7 +34,7 @@ function AdminDashboard() {
       try {
         //console.log('Fetching elections...');
         const response = await axios.get('http://127.0.0.1:8000/api/elections/');
-        //console.log('Fetched data:', response.data);
+       // console.log('Fetched data:', response.data);
         setElections(response.data);
       } catch (error) {
         console.error('Error fetching election data:', error);
@@ -79,15 +79,15 @@ function AdminDashboard() {
     };
 
     function handleNewElection() {
-      navigate('/system-admin/election-details');
+      navigate('/election-manager/election-details');
     }
 
     function navigateCompleted() {
-      navigate('/system-admin/completed-election');
+      navigate('/election-manager/completed-election');
     }
 
     function navigateArchived() {
-      navigate('/system-admin/archived-elections');
+      navigate('/election-manager/archived-elections');
     }
 
     return (
@@ -114,11 +114,8 @@ function AdminDashboard() {
               <option value="Scheduled">Scheduled</option>
             </select>
             <button className='search-bar-button' onClick={handleSearch}>Search</button>
-            
-            {/*
             <button onClick={navigateArchived}>Archived Elections</button>
             <button onClick={handleNewElection}>New Election</button>
-            */}
           </div>
 
           <div className="election-item-titles">
@@ -133,7 +130,7 @@ function AdminDashboard() {
             <button 
               key={election.id} 
               className="election-item" 
-              onClick={() => navigate(`/system-admin/${election.status}-election`, { state: { election } })}
+              onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
             >
               <div>{election.title}</div>
               <div>{election.status}</div>
@@ -172,7 +169,7 @@ function AdminDashboard() {
             <button 
               key={election.id} 
               className="election-item" 
-              onClick={() => navigate(`/system-admin/${election.status}-election`, { state: { election } })}
+              onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
             >
               <div>{election.title}</div>
               <div>{election.status}</div>
@@ -187,4 +184,4 @@ function AdminDashboard() {
     );
 }
 
-export default AdminDashboard;
+export default ElectionManagerDashboard;

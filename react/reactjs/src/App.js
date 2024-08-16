@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import VoterAppLayout from "./VoterAppLayout";
 import ElectionManagerAppLayout from "./ElectionManagerAppLayout";
 
@@ -21,7 +21,33 @@ import AdminElectionResults from "./Components/Accounts/AdminElectionResults";
 // Import components for ElectionManagerApp
 import ElectionManager from './ElectionManager'; // New ElectionManager component
 
+// Import components for SystemAdminApp
+import SystemAdmin from './SystemAdmin'; // New ElectionManager component
+
 function App() {
+  //const navigate = useNavigate();
+  
+  function getUserTypeFromCookie() {
+    
+    const cookieData = document.cookie
+    const sessionData = cookieData.split(',');
+    //console.log("Usertype is ", sessionData[5])
+    
+    
+    return sessionData[5]; // assuming the cookie name is `usertype`
+  }
+  
+  function ProtectedRoute({ allowedUserType, element }) {
+    const userType = getUserTypeFromCookie();
+
+    if (userType === allowedUserType) {
+        return element;
+    } else {
+
+    }
+  }
+
+
   return (
     <Router>
       <Routes>
@@ -29,17 +55,30 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         
         {/* VoterApp Routes */}
-        <Route path="/voter/*" element={<VoterAppLayout><VoterApp /></VoterAppLayout>} />
+        <Route 
+            path="/voter/*" 
+            element={<ProtectedRoute allowedUserType="Voter" element={<VoterAppLayout><VoterApp /></VoterAppLayout>} />} 
+        />
 
-        {/* ElectionManagerRoutes */}
-        <Route path="/election-manager/*" element={<ElectionManagerAppLayout><ElectionManager /></ElectionManagerAppLayout>} />
+        {/* ElectionManager Routes */}
+        <Route 
+            path="/election-manager/*" 
+            element={<ProtectedRoute allowedUserType="Election Manager" element={<ElectionManagerAppLayout><ElectionManager /></ElectionManagerAppLayout>} />} 
+        />
 
         {/* SystemAdmin Routes */}
-        <Route path="/system-admin/*" element={<SystemAdminApp />} />
+        <Route 
+            path="/system-admin/*" 
+            element={<ProtectedRoute allowedUserType="System Admin" element={<SystemAdmin />} />} 
+        />
+        
+        
       </Routes>
     </Router>
   );
 }
+
+
 
 function VoterApp() {
   return (
@@ -53,14 +92,7 @@ function VoterApp() {
   );
 }
 
-function SystemAdminApp() {
-  return (
-    <Routes>
-      <Route path='/' element={<AdminDashboard />} />
-      <Route path='/AccMng' element={<AccMng />} />
-      <Route path='/admin-election-results' element={<AdminElectionResults />} />
-    </Routes>
-  )
-}
+
+
 
 export default App;

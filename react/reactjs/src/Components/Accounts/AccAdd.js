@@ -24,7 +24,7 @@ function AccAdd() {
         // const selectedUsertype = event.target.options.selectedIndex;
         // console.log("Selected usertype:", selectedUsertype);
         
-        console.log(username +" "+ password +" "+ usertype+" "+dpt)
+        //console.log(username +" "+ password +" "+ usertype+" "+dpt)
 
         
         try {
@@ -37,7 +37,7 @@ function AccAdd() {
             });
 
             const data = await response.json();
-            console.log("BACKEND RETURNED WITH", data)
+            //console.log("BACKEND RETURNED WITH", data)
             alert("Account insertion was " + data.RESULT);
         } catch (error) {
             console.error('Error:', error.message); // Handle errors appropriately (display error message)
@@ -55,7 +55,7 @@ function AccAdd() {
 
             const r = await response.json();
             setDptList(r.Data)
-            console.log(r.Data)
+            //console.log(r.Data)
         } catch (error) {
             console.error('Error:', error.message); // Handle errors appropriately (display error message)
         }
