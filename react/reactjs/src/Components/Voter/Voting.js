@@ -270,10 +270,10 @@ const fetchPaillierPublicKey = async () => {
             <div className="modal">
               <div className="modal-content">
                 <h3>Election guidelines and Rules</h3>
-                <p>xxx</p>
-                <p>xxxxxx</p>
-                <p>xx</p>
-                <p>x</p>
+                <p>You are entitled to vote only once. </p>
+                <p>Do not interfere with or influence others’ voting decisions.</p>
+                <p>Your vote is confidential and cannot be traced back to you. The e-voting system is designed to ensure privacy and confidentiality.</p>
+                <p>Confirm your selections before submitting.</p>
                 <button className='inoffensive-close-button' onClick={handleCloseRulesModal}>Next</button>
               </div>
             </div>

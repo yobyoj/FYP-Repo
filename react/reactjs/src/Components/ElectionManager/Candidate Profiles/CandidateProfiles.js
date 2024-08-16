@@ -56,10 +56,7 @@ function ElectionManagerCandidateProfiles({ formData, updateCandidates }) {
                     <main className="candidate-content">
                         <div className="header-search">
                             <h1>Candidates</h1>
-                            <div className="search-container">
-                                <input type="text" placeholder="Search for candidate" />
-                                <button type="button">Search</button>
-                            </div>
+                           
                         </div>
 
                         {candidates.map((candidate, index) => (

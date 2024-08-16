@@ -62,10 +62,7 @@ function ElectionManagerListOfVoters( {formData, updateVoters} ) {
                     <main className="voter-content">
                         <div className="header-search">
                             <h1>Voters</h1>
-                            <div className="search-container">
-                                <input type="text" placeholder="Search for voter" />
-                                <button type="button">Search</button>
-                            </div>
+                        
                         </div>
 
                         {votersDept.map((dept, index) => (

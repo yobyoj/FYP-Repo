@@ -19,20 +19,34 @@ function Summary3({ formData, resetFormData }) {
                 body: JSON.stringify(formData),
             });
             const data = await response.json();
+            
             if (data.status === 'success') {
                 console.log('Form data submitted successfully:', data.message);
                 resetFormData();
-                alert('Election created!');
+                alert('Election created successfully!');
                 navigate('/election-manager/');
             } else {
-                console.error('Error submitting form data:', data.message);
+                // Custom error handling based on backend response
+                if (data.message.includes('The following candidates have mismatched details')) {
+                    const missingCandidates = data.message.match(/\[(.*?)\]/)[1];
+                    alert(`Error: The following candidate(s) have mismatched details: ${missingCandidates}. Please check their information.`);
+                } else if (data.message.includes('The following voter emails do not exist')) {
+                    const missingVoters = data.message.match(/\[(.*?)\]/)[1];
+                    alert(`Error: The following voter email(s) do not exist in the system: ${missingVoters}. Please verify the voters' emails.`);
+                } else if (data.message.includes('Invalid name format for candidate')) {
+                    alert(`Error: Invalid naming format for the candidates. Please verify.`);
+                } else {
+                    alert('Error submitting form data. Please check the form and try again.');
+                }
                 setIsSubmitting(false); // Re-enable the button on error
             }
         } catch (error) {
             console.error('Error submitting form data:', error);
+            alert('An unexpected error occurred. Please try again.');
             setIsSubmitting(false); // Re-enable the button on error
         }
     };
+    
 
     const createElection = () => {
         if (formData.title === '' || formData.description === '' || formData.start_date === '' 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'; // Import the uuid library
+import DOMPurify from 'dompurify'; 
 import './CandidateModal.css';
 
 function CandidateModal({ isOpen, onClose, onSave }) {
@@ -8,10 +9,23 @@ function CandidateModal({ isOpen, onClose, onSave }) {
     const [role, setRole] = useState('');
     const [description, setDescription] = useState('');
 
+    
+    const sanitizeInput = (input) => {
+        const trimmedInput = input.trim(); 
+        const sanitizedInput = DOMPurify.sanitize(trimmedInput); // Sanitize HTML input
+        return sanitizedInput;
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        const sanitizedName = sanitizeInput(name);
+        const sanitizedEmail = sanitizeInput(email);
+        const sanitizedRole = sanitizeInput(role);
+        const sanitizedDescription = sanitizeInput(description);
+
         const uuid = uuidv4(); // Generate a UUID for the candidate
-        onSave({ name, email, role, description, uuid }); // Include the UUID in the candidate object
+        onSave({ name: sanitizedName, email: sanitizedEmail, role: sanitizedRole, description: sanitizedDescription, uuid }); // Include the UUID in the candidate object
         onClose();
     };
 

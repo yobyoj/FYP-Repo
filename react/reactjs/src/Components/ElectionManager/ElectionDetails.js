@@ -1,32 +1,38 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 import './ElectionDetails.css';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { useNavigate } from 'react-router-dom';
 
 function ElectionManagerElectionDetails({ formData, updateFormData }) {
     const navigate = useNavigate();
 
+    // Utility function to sanitize input without trimming spaces
+    const sanitizeInput = (input) => {
+        return DOMPurify.sanitize(input); // Sanitize HTML input, but don't trim spaces
+    };
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        updateFormData(name, value);
+        const { name, value, type } = e.target;
+        
+        // Only sanitize text inputs
+        const sanitizedValue = type === 'text' ? sanitizeInput(value) : value;
+        
+        updateFormData(name, sanitizedValue);
     };
 
     const startDate = new Date(formData.startDate);
     const endDate = new Date(formData.endDate);
 
-   
     const handleSubmit = (e) => {
         e.preventDefault(); 
         if (startDate >= endDate) {
             alert('The start date must be before the end date.');
-        }
-        else{
-            if (formData.electionType === 'Candidates'){
+        } else {
+            if (formData.electionType === 'Candidates') {
                 navigate('/election-manager/candidate-profiles');
-            }
-            else
-            {
+            } else {
                 navigate('/election-manager/election-topics');
             }
         }
@@ -37,7 +43,7 @@ function ElectionManagerElectionDetails({ formData, updateFormData }) {
             <Header />
             <div className='container'>
                 <div className="election-details-page">
-                <Sidebar electionType={formData.electionType}/>
+                    <Sidebar electionType={formData.electionType}/>
                     <main className="form-content">
                         <h1>Election Details</h1>
                         <form onSubmit={handleSubmit}>

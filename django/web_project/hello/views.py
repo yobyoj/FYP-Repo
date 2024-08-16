@@ -254,8 +254,8 @@ def jsonReader(filepath):
 def jsonReader(filePath):
     with open(filePath, 'r') as file:
         return json.load(file)
-          
-    
+
+
 @csrf_exempt
 def handle_new_election(request):
     if request.method == 'POST':
@@ -272,10 +272,51 @@ def handle_new_election(request):
         voters_dept = data.get('votersDept', [])
 
         try:
+            # Validate the candidates' emails and names
+            missing_candidates = []
+            for candidate in candidates:
+                email = candidate['email']
+                name = candidate['name']
+                try:
+                    first_name, last_name = name.split(' ', 1)  # Assuming the name is in "First Last" format
+                except ValueError:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Invalid name format for candidate {email}. Expected "First Last".'
+                    }, status=400)
+
+                user = UserAccount.objects.filter(username=email, firstname=first_name, lastname=last_name).first()
+
+                if not user:
+                    missing_candidates.append({
+                        'email': email,
+                        'name': name
+                    })
+
+            if missing_candidates:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'The following candidates have mismatched details: {missing_candidates}'
+                }, status=400)
+                
+            missing_voters = []
+            for voter in voters:
+                voter_email = voter.get('voterEmail')
+                user = UserAccount.objects.filter(username=voter_email).first()
+
+                if not user:
+                    missing_voters.append(voter_email)
+
+            if missing_voters:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'The following voter emails do not exist in the user_accounts table: {missing_voters}'
+                }, status=400)    
+                
+
             # Validate and adjust the timezone string
             if timezone_str.startswith('GMT') and len(timezone_str) > 3:
                 offset = int(timezone_str[3:])
-                # Adjust the timezone string for pytz compatibility
                 timezone_str = f'Etc/GMT{-offset}' if offset >= 0 else f'Etc/GMT+{abs(offset)}'
 
             # Convert string dates to datetime objects
@@ -322,11 +363,14 @@ def handle_new_election(request):
 
 #updates the election-voter-status table
 def add_voters_to_status(election):
+    # Extract candidate emails to exclude them from being added as voters
+    candidate_emails = [candidate.get("email") for candidate in election.candidates if candidate.get("email")]
+
     # Add individual voters based on voterEmail
     if election.voters:
         for voter in election.voters:
             voter_email = voter.get("voterEmail")
-            if voter_email:
+            if voter_email and voter_email not in candidate_emails:  # Exclude candidates
                 try:
                     # Check if the user is of type 'Voter'
                     user = UserAccount.objects.get(username=voter_email, usertype='Voter')
@@ -342,8 +386,8 @@ def add_voters_to_status(election):
             if department_name:
                 try:
                     department = Department.objects.get(departmentname=department_name)
-                    # Filter users by department and check if they are 'Voter' type
-                    users = UserAccount.objects.filter(department=department, usertype='Voter')
+                    # Filter users by department and check if they are 'Voter' type, excluding candidates
+                    users = UserAccount.objects.filter(department=department, usertype='Voter').exclude(username__in=candidate_emails)
                     if not users.exists():
                         print(f"No 'Voter' users found in department {department_name}.")
                     else:
@@ -352,6 +396,7 @@ def add_voters_to_status(election):
                 except Department.DoesNotExist:
                     print(f"Department {department_name} does not exist.")
                     pass
+
 
 
 class DisplayElections(generics.ListAPIView):
@@ -366,8 +411,9 @@ class DisplayCompletedElections(generics.ListAPIView):
 def delete_election(request, id):
     if request.method == 'DELETE':
         try:
+            EncryptedTally.objects.filter(election_id=id).delete()
+
             election = Election.objects.get(id=id)
-            print(election)
             election.delete()
             # delete_election_voter_status(election)
             
@@ -734,17 +780,6 @@ def loginFunc(request):
                 
                 for x in tuplist_result[0]:
                     print(x)
-                
-                # token = generate_jwt(
-                #     tuplist_result[0][0], 
-                #     tuplist_result[0][1], 
-                #     tuplist_result[0][2], 
-                #     tuplist_result[0][3], 
-                #     tuplist_result[0][4],
-                #     tuplist_result[0][5]
-                # )
-                
-                
                 
                 # print(f"TOKEN GENERATED IS",token)
                 r = JsonResponse({'message': 'Login successful', 'data': tuplist_result[0]}, status=200)
