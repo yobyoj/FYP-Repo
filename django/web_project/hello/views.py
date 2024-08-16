@@ -363,11 +363,14 @@ def handle_new_election(request):
 
 #updates the election-voter-status table
 def add_voters_to_status(election):
+    # Extract candidate emails to exclude them from being added as voters
+    candidate_emails = [candidate.get("email") for candidate in election.candidates if candidate.get("email")]
+
     # Add individual voters based on voterEmail
     if election.voters:
         for voter in election.voters:
             voter_email = voter.get("voterEmail")
-            if voter_email:
+            if voter_email and voter_email not in candidate_emails:  # Exclude candidates
                 try:
                     # Check if the user is of type 'Voter'
                     user = UserAccount.objects.get(username=voter_email, usertype='Voter')
@@ -383,8 +386,8 @@ def add_voters_to_status(election):
             if department_name:
                 try:
                     department = Department.objects.get(departmentname=department_name)
-                    # Filter users by department and check if they are 'Voter' type
-                    users = UserAccount.objects.filter(department=department, usertype='Voter')
+                    # Filter users by department and check if they are 'Voter' type, excluding candidates
+                    users = UserAccount.objects.filter(department=department, usertype='Voter').exclude(username__in=candidate_emails)
                     if not users.exists():
                         print(f"No 'Voter' users found in department {department_name}.")
                     else:
@@ -393,6 +396,7 @@ def add_voters_to_status(election):
                 except Department.DoesNotExist:
                     print(f"Department {department_name} does not exist.")
                     pass
+
 
 
 class DisplayElections(generics.ListAPIView):
