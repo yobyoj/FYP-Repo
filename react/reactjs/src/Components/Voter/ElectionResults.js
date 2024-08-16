@@ -17,7 +17,7 @@ function ElectionResults() {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/completed-elections/');
             setCompletedElectionList(response.data);
-            console.log('Completed Elections List:', response.data);
+            //console.log('Completed Elections List:', response.data);
         } catch (error) {
             console.error('Error fetching election data:', error);
         }

@@ -15,13 +15,17 @@ function Dashboard() {
   useEffect(() => {
     const fetchElections = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/get_user_elections', {
+        const response = await axios.get('http://localhost:8000/api/get_user_elections/', {
           params: {
             userid: userId,
           },
         });
   
-        const allElections = response.data.elections;
+        const allElections = response.data.elections || [];
+
+        if (!Array.isArray(allElections)) {
+          throw new Error('Invalid data format received from the server');
+        }
   
         // Filter elections into pending and processing categories
         const pending = allElections.filter(election => !election.has_voted);
@@ -31,7 +35,7 @@ function Dashboard() {
         setProcessingElection(processing);
 
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'An error occurred while fetching the elections.');
       }
     };
 
@@ -41,11 +45,10 @@ function Dashboard() {
     // Extract the numeric value from the first element
     const userIdString = sessionData[0]; // This will be "sessionData=xx"
     const userId = userIdString.split('=')[1]; // This extracts "xx"
-    console.log(userId)
 
     fetchElections();
   }, []);
-  
+
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -54,16 +57,15 @@ function Dashboard() {
     election.title && election.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+
   const handleVote = (electionId) => {
     const votedElection = pendingElection.find(election => election.id === electionId);
   
     if (votedElection) {
-      // Navigate to the voting page and pass election data as state
       navigate('/voter/election-voting', { state: { election: votedElection } });
     }
   };
   
-
   const formatDate = (dateString, timezone) => {
     const date = new Date(dateString);
     const options = {
@@ -80,7 +82,6 @@ function Dashboard() {
     return new Intl.DateTimeFormat('en-US', options).format(date);
   };
 
-  
   return (
     <div className="voter-app-container">
       <NewHeader />

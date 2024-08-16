@@ -67,15 +67,7 @@ function PrivacyPolicy() {
                             <p>We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. The updated policy will be posted on our website, and the date of the latest revision will be indicated.</p>
                             <br />
                             
-                            <h3>9. Contact Us</h3>
-                            <p>If you have any questions or concerns about our privacy practices, please contact our Data Protection Officer at:</p>
-                            <p>[Company Name]<br />
-                            [Address]<br />
-                            [Email]<br />
-                            [Phone Number]</p>
-                            <br />
-                            
-                            <h3>10. Governing Law</h3>
+                            <h3>9. Governing Law</h3>
                             <p>This Privacy Policy is governed by the laws of Singapore.</p><br />
                             
                         </div>
