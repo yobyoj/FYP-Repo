@@ -65,17 +65,17 @@ function Voting() {
 
 
 /***************to delete***/
-  const checkPaillierPublicKeyComponents = (paillierPublicKey) => {
-    console.log('Public Key Components:');
-    console.log('n:', paillierPublicKey.n, typeof paillierPublicKey.n);
-    console.log('n2:', paillierPublicKey.n2, typeof paillierPublicKey.n2);
+  // const checkPaillierPublicKeyComponents = (paillierPublicKey) => {
+  //   console.log('Public Key Components:');
+  //   console.log('n:', paillierPublicKey.n, typeof paillierPublicKey.n);
+  //   console.log('n2:', paillierPublicKey.n2, typeof paillierPublicKey.n2);
 
-    if (paillierPublicKey.g) {
-        console.log('g:', paillierPublicKey.g, typeof paillierPublicKey.g);
-    } else {
-        console.log('g is undefined or not used');
-    }
-  };
+  //   if (paillierPublicKey.g) {
+  //       console.log('g:', paillierPublicKey.g, typeof paillierPublicKey.g);
+  //   } else {
+  //       console.log('g is undefined or not used');
+  //   }
+  // };
 
   // Call this function after fetching the public key
   useEffect(() => {
@@ -86,9 +86,9 @@ function Voting() {
           keysGeneratedRef.current = true; // Mark keys as generated
       }
       
-      if (paillierPublicKey) {
-          checkPaillierPublicKeyComponents(paillierPublicKey); // Check public key components
-      }
+      // if (paillierPublicKey) {
+      //     checkPaillierPublicKeyComponents(paillierPublicKey); // Check public key components
+      // }
   }, []); 
 
 
@@ -118,8 +118,8 @@ function Voting() {
 
       // Set generated keys in state
       setKeys({ publicKey: publicKeyPem, privateKey: privateKeyPem });
-      console.log({ publicKey: publicKeyPem, privateKey: privateKeyPem });
-      console.log("RSA Keys should have been generated");
+      //console.log({ publicKey: publicKeyPem, privateKey: privateKeyPem });
+      //console.log("RSA Keys should have been generated");
     } catch (err) {
       console.error('Error generating keys:', err);
     }
@@ -144,7 +144,7 @@ function Voting() {
 
     // Encode the signature as base64
     const signatureBase64 = forge.util.encode64(signature);
-    console.log('Signature:' + signatureBase64);
+    //console.log('Signature:' + signatureBase64);
     return signatureBase64;
   };
 
@@ -164,15 +164,15 @@ const fetchPaillierPublicKey = async () => {
         const n2 = n ** BigInt(2);
         const g = n + BigInt(1); // Assuming g = n + 1, but verify this
 
-        console.log('Computed n2:', n2.toString());
-        console.log('Computed g:', g.toString());
+        //console.log('Computed n2:', n2.toString());
+        //console.log('Computed g:', g.toString());
         // Create the public key using the paillier-bigint library
         const pail_publicKey = new paillierBigint.PublicKey(n, g, n2);
 
         setPaillierPublicKey(pail_publicKey);
-        console.log('Paillier Public Key:', pail_publicKey);
+        //console.log('Paillier Public Key:', pail_publicKey);
     } catch (error) {
-        console.error('Error fetching Paillier public key:', error);
+       // console.error('Error fetching Paillier public key:', error);
     }
 };
 
@@ -182,7 +182,7 @@ const fetchPaillierPublicKey = async () => {
  // Function to encrypt vote data using Paillier public key
   const encryptVoteData = (voteData) => {
     if (!paillierPublicKey) {
-        console.error('Paillier public key not available');
+        //console.error('Paillier public key not available');
         return null;
     }
     // Assuming the 'uuid' field is what you want to encrypt
@@ -194,7 +194,7 @@ const fetchPaillierPublicKey = async () => {
         const encryptedData = paillierPublicKey.encrypt(plaintextBigInt);   
         return encryptedData.toString(); // Convert BigInt to string for transmission
     } catch (error) {
-        console.error('Encryption failed:', error);
+        //console.error('Encryption failed:', error);
         return null;
     }
   };
@@ -249,7 +249,7 @@ const fetchPaillierPublicKey = async () => {
     const digitalSignature = signDataWithPrivateKey(encryptedVoteData, keys.privateKey);
 
     submitVote(encryptedVoteData, keys.publicKey, digitalSignature, election.id, userId);
-    console.log('after submitting the vote, the signature is: ', digitalSignature);
+    //console.log('after submitting the vote, the signature is: ', digitalSignature);
     setShowVoteModal(false);
     setShowFinalModal(true);
 

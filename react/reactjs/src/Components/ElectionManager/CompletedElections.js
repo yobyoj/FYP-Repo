@@ -29,7 +29,7 @@ function CompletedElections() {
             setCompletedElectionList(response.data);
 
             // Log the completedElectionsList to the console
-            console.log('Completed Elections List:', response.data);
+            //console.log('Completed Elections List:', response.data);
         } catch (error) {
             console.error('Error fetching election data:', error);
         }
