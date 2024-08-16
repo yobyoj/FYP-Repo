@@ -38,7 +38,11 @@ const LoginForm2 = () => {
       }
 
       if (data.data) {
-        document.cookie = "sessionData=" + data.data + "; path=/; expires=" + new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString();
+        //document.cookie = "sessionData=" + data.data + "; path=/; expires=" + new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString();
+        
+ 
+        //document.cookie = `sessionData=${data.data}; path=/; expires=${new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString()}; Secure`;
+        document.cookie = "sessionData=" + data.data + "; path=/; expires=" + new Date(Date.now() + 8 * 60 * 60 * 1000).toUTCString() + "; SameSite=Strict; Secure";
         
         const cookieData = document.cookie
         const sessionData = cookieData.split(',');
