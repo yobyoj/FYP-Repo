@@ -34,19 +34,25 @@
   width: 100%; /* Ensure form takes full width of container */
 }
 
-table {
+table .login {
   border-collapse: collapse;
+  border: 0px solid #dddddd;
   width: 100%;
 }
 
-th {
+th .login{
   text-align: center;
   padding: 10px;
+  border: 0px solid #dddddd;
 }
 
-td {
+td .login{
   padding: 10px;
   border: 0px solid black; /* Remove borders */
+}
+
+tr .login{
+  background-color: transparent;
 }
 
 .lbl {

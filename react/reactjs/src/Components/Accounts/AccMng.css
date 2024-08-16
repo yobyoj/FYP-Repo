@@ -1,16 +1,18 @@
+
+
 .newHeader {
   position: absolute;
   top: 0;
 }
 
 
-table .form {
+table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
 
-td .form {
+td {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -18,15 +20,19 @@ td .form {
 
 
 
-tr:nth-child(even) .form{
+tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
 
 
 .page1 {
-    display: flex;
-    min-height: 100vh; /* Ensures body fills the viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  position: absolute;
+  left: 0;
 }
 
 .sidebar1 {
@@ -41,8 +47,10 @@ tr:nth-child(even) .form{
   background-color: #fff;
   width: 40%;
   display: flex; /* Make the right div a flexbox container */
-  flex-direction: column; /* Arrange elements vertically (top-to-bottom) */
-  align-items: left; /* Horizontally center the elements */
+  flex-direction: column; /* Arrange elements vertically (top-to-bottom) */  
+  align-items: center; /* Changed to center */
+  justify-content: center; /* Add to vertically center content */
+
 }
   
 input[type="text"] {

@@ -101,16 +101,16 @@ const LoginForm2 = () => {
       <div className={styles.rightDiv}> <div className={styles.loginForm}>
       
         <form onSubmit={handleLogin}>
-          <table>
-            <thead>
-              <tr>
-                <th colSpan="2"><h1>Login</h1></th>
+          <table className = {styles.login}>
+            <thead className = {styles.login}>
+              <tr className = {styles.login}>
+                <th className = {styles.login} colSpan="2"><h1>Login</h1></th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className={styles.lbl}> <label htmlFor="username">Username:</label> </td>
-                <td className={styles.inp}>
+              <tr className = {styles.login}>
+                <td className={styles.lbl} className = {styles.login}> <label htmlFor="username">Username:</label> </td>
+                <td className={styles.inp} className = {styles.login}>
                   <input
                     type="text"
                     id="username"
@@ -121,8 +121,8 @@ const LoginForm2 = () => {
               </tr>
 
               <tr>
-                <td className={styles.lbl}><label htmlFor="password">Password:</label></td>
-                <td className={styles.inp}>
+                <td className={styles.lbl} className = {styles.login}><label className = {styles.login} htmlFor="password">Password:</label></td>
+                <td className={styles.inp} className = {styles.login}>
                   <input
                     type="password"
                     id="password"
@@ -131,11 +131,11 @@ const LoginForm2 = () => {
                   />
                 </td>
               </tr>
-              <tr>
-                <td colSpan="2"><button type="submit" className={styles.loginBtn}>Login</button></td>
+              <tr className = {styles.login}>
+                <td className = {styles.login} colSpan="2"><button type="submit" className={styles.loginBtn}>Login</button></td>
               </tr>
               <tr>
-                <td colSpan="2"> <Link to="/forgot-password" class={styles.forgotLink}>Forgot Password?</Link> </td>
+                <td className = {styles.login} colSpan="2"> <Link to="/forgot-password" class={styles.forgotLink}>Forgot Password?</Link> </td>
               </tr>
             </tbody>
           </table>

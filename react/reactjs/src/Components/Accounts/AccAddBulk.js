@@ -90,12 +90,11 @@ function AccAddBulk() {
   };
     
     return (
+    <>
+        <h1> Bulk Add Accounts</h1>
         <form onSubmit={handleAccAdd}>
                     <table>
                         <thead>
-                            <tr>
-                                <th colSpan="2"><h1> Bulk Add Accounts</h1></th>
-                            </tr>
                         </thead>
                         <tbody>
                             <tr>
@@ -140,7 +139,7 @@ function AccAddBulk() {
                         </tbody>
                     </table>
                 </form>
-    )
+    </>)
 }
 
 export default AccAddBulk

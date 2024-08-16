@@ -7,7 +7,7 @@ import AccAddBulk from './AccAddBulk';
 import AccDel from './AccDel';
 import AccEdit from './AccEdit';
 import SideBar from './Sidebar';
-import NewHeader from './NewHeader';
+import NewHeader from './Header';
 
 
 function AccMng({ children, style }) {
@@ -29,9 +29,6 @@ function AccMng({ children, style }) {
         <div>
             <NewHeader />
             <div className = "page1">
-                <div>
-                    <SideBar className='sidebar1'/>
-                </div>
                 <div className="cont">
                     <h1>ADMIN PAGE </h1>
                     <div className="container">

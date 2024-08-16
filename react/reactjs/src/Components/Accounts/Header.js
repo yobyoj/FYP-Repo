@@ -20,8 +20,14 @@ function Header() {
                     <img src={companyLogo} alt="Company Logo" className={styles.logo} />
                 </Link>
             </div>
+            
             <div className={styles.navContainer}>
+                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/system-admin/')}>     Dashboard     </button>
+            
+                <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/system-admin/AccMng')}>     Account Managment     </button>
+                
                 <button className={`${styles.noStyleButton} ${styles.navItem}`} onClick={() => handleNavigate('/')}>Logout</button>
+                
                 <div className={`${styles.headerText} ${styles.navItem}`}> {sessionData[1]}</div>
             </div>
         </header>
