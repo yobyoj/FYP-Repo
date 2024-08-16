@@ -52,10 +52,7 @@ function ElectionManagerElectionTopics({ formData, updateTopics }) {
                     <main className="topics-content">
                         <div className="header-search">
                             <h1>Topics</h1>
-                            <div className="search-container">
-                                <input type="text" placeholder="Search for topic" />
-                                <button type="button">Search</button>
-                            </div>
+                            
                         </div>
 
                         {topics.map((topic, index) => (
