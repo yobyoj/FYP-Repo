@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AccEditForm.css'
 
 function AccEditForm({ user, onClose }, ) {
@@ -7,6 +7,7 @@ function AccEditForm({ user, onClose }, ) {
   const [lastn, setLastn] = useState(user[3]);
   const [dpt, setDpt] = useState(user[4]);
   const [usert, setUsert] = useState(user[5]);
+  const [dptList, setDptList] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
@@ -47,6 +48,47 @@ function AccEditForm({ user, onClose }, ) {
 
   // ... form UI with input fields, submit button, and cancel button
 
+
+    const getDptList = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/getDptList/', {
+                method: 'POST',
+                body: JSON.stringify({hi: 'hi'}),
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+            });
+
+            const r = await response.json();
+            setDptList(r.Data)
+            console.log(r.Data)
+        } catch (error) {
+            console.error('Error:', error.message); // Handle errors appropriately (display error message)
+        }
+    }
+    
+    
+    const createDepartmentOptions = () => {
+    useEffect(() => {
+      getDptList(); // Call getDptList on component mount
+    }, []);
+
+    return (
+    dptList && dptList.length > 0 ? (  // Check if dptList is an array with elements
+      dptList.map((department) => {
+        const departmentName = department[0]; // Access the first element (department name)
+        return (
+          <option key={departmentName} value={departmentName}>
+            {departmentName}
+          </option>
+        );
+      })
+    ) : (
+      <p>Loading departments...</p> // Display loading message while fetching data
+    )
+  );
+  };
+  
   return (
     <div className="edit-form-overlay">
       {/* Black background with 75% transparency */}
@@ -94,23 +136,26 @@ function AccEditForm({ user, onClose }, ) {
               <tr>
                 <td><label htmlFor="dpt">Department:</label></td>
                 <td>
-                  <input 
-                    type="text" 
-                    id="dpt" 
-                    defaultValue={dpt} 
-                    onChange={(e) => setDpt(e.target.value)}
-                  />
+                  <select id="department" name="department" value={dpt} onChange={(e) => setDpt(e.target.value)}>
+                    <option value="" disabled>Choose an option</option>
+                    {createDepartmentOptions()}
+                  </select>
                 </td>
               </tr>
               <tr>
                 <td><label htmlFor="usert">Usertype:</label></td>
                 <td>
-                  <input 
-                    type="text" 
-                    id="usert" 
-                    defaultValue={usert} 
-                    onChange={(e) => setUsert(e.target.value)}
-                  />
+                <select
+                  id="usert"
+                  name="usert"
+                  value={usert}
+                  onChange={(e) => setUsert(e.target.value)}
+                >
+                  <option value="" disabled>Choose an option</option>
+                  <option value="Voter">Voter</option>
+                  <option value="Election Manager">Election Manager</option>
+                  <option value="System Admin">System Admin</option>
+                </select>
                 </td>
               </tr>
               <tr>

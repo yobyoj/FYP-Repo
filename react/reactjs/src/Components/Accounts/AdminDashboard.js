@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import './AdminDashboard.css';
+import './AdminDashboard.module.css';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SideBar from './Sidebar';
 
 function AdminDashboard() {
   const [elections, setElections] = useState([]); // All elections
@@ -91,97 +92,106 @@ function AdminDashboard() {
   }
 
   return (
-    <>
-      <Header />
+  <div className="dashboard">
+    <div className="dashboardText">Dashboard</div>
 
-      <div className="dashboard">
-        <div className="dashboardText">Dashboard</div>
+    <div className="search-bar-column">
+      <input
+        type="text"
+        placeholder="Search by election title"
+        value={searchBar}
+        onChange={(e) => setSearchBar(e.target.value)}
+      />
+      <select
+        className="filter"
+        value={filterState}
+        onChange={(e) => setFilterState(e.target.value)}
+      >
+        <option value="All">All</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Scheduled">Scheduled</option>
+      </select>
+      <button className="search-bar-button" onClick={handleSearch}>
+        Search
+      </button>
+      <button onClick={navigateArchived}>Archived Elections</button>
+      <button onClick={handleNewElection}>New Election</button>
+    </div>
 
-        <div className="search-bar-column">
-          <input 
-            type="text" 
-            placeholder="Search by election title" 
-            value={searchBar} 
-            onChange={(e) => setSearchBar(e.target.value)}
-          /> 
-          <select 
-            className='filter' 
-            value={filterState} 
-            onChange={(e) => setFilterState(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Scheduled">Scheduled</option>
-          </select>
-          <button className='search-bar-button' onClick={handleSearch}>Search</button>
-          <button onClick={navigateArchived}>Archived Elections</button>
-          <button onClick={handleNewElection}>New Election</button>
-        </div>
+    <div className="election-item-titles">
+      <div><u>Election Name</u></div>
+      <div><u>Status</u></div>
+      <div><u>Timezone</u></div>
+      <div><u>Start Date</u></div>
+      <div><u>End Date</u></div>
+    </div>
 
-        <div className="election-item-titles">
-          <div><u>Election Name</u></div>
-          <div><u>Status</u></div>
-          <div><u>Timezone</u></div>
-          <div><u>Start Date</u></div>
-          <div><u>End Date</u></div>
-        </div>
+    {filteredElections.map(election => (
+      <button
+        key={election.id}
+        className="election-item"
+        onClick={() =>
+          navigate(`/election-manager/${election.status}-election`, {
+            state: { election },
+          })
+        }
+      >
+        <div>{election.title}</div>
+        <div>{election.status}</div>
+        <div>{election.timezone}</div>
+        <div>{formatDate(election.startDate, election.timezone)}</div>
+        <div>{formatDate(election.endDate, election.timezone)}</div>
+      </button>
+    ))}
 
-        {filteredElections.map(election => (
-          <button 
-            key={election.id} 
-            className="election-item" 
-            onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
-          >
-            <div>{election.title}</div>
-            <div>{election.status}</div>
-            <div>{election.timezone}</div>
-            <div>{formatDate(election.startDate, election.timezone)}</div>
-            <div>{formatDate(election.endDate, election.timezone)}</div>
-          </button>
-        ))}
+    <br />
+    <br />
 
-        <br />
-        <br />
-
-        <div className="completed-elections-border">
-          <div className="dashboardText"><span>Completed Elections</span></div>
-
-          <div className="completed-search-bar-column">
-            <input 
-              type="text" 
-              placeholder="Search completed elections by title" 
-              value={completedSearchBar} 
-              onChange={(e) => setCompletedSearchBar(e.target.value)}
-            />
-            <button className='completed-search-bar-button' onClick={handleCompletedSearch}>Search</button>
-          </div>
-        </div>
-        
-          <div className="election-item-titles">
-          <div><u>Election Name</u></div>
-          <div><u>Status</u></div>
-          <div><u>Timezone</u></div>
-          <div><u>Start Date</u></div>
-          <div><u>End Date</u></div>
-        </div>
-
-        {filteredCompletedElections.map(election => (
-          <button 
-            key={election.id} 
-            className="election-item" 
-            onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
-          >
-            <div>{election.title}</div>
-            <div>{election.status}</div>
-            <div>{election.timezone}</div>
-            <div>{formatDate(election.startDate, election.timezone)}</div>
-            <div>{formatDate(election.endDate, election.timezone)}</div>
-          </button>
-        ))}
-
+    <div className="completed-elections-border">
+      <div className="dashboardText">
+        <span>Completed Elections</span>
       </div>
-    </>
-  );
+
+      <div className="completed-search-bar-column">
+        <input
+          type="text"
+          placeholder="Search completed elections by title"
+          value={completedSearchBar}
+          onChange={(e) => setCompletedSearchBar(e.target.value)}
+        />
+        <button className="completed-search-bar-button" onClick={handleCompletedSearch}>
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div className="election-item-titles">
+      <div><u>Election Name</u></div>
+      <div><u>Status</u></div>
+      <div><u>Timezone</u></div>
+      <div><u>Start Date</u></div>
+      <div><u>End Date</u></div>
+    </div>
+
+    {filteredCompletedElections.map(election => (
+      <button
+        key={election.id}
+        className="election-item"
+        onClick={() =>
+          navigate(`/election-manager/${election.status}-election`, {
+            state: { election },
+          })
+        }
+      >
+        <div>{election.title}</div>
+        <div>{election.status}</div>
+        <div>{election.timezone}</div>
+        <div>{formatDate(election.startDate, election.timezone)}</div>
+        <div>{formatDate(election.endDate, election.timezone)}</div>
+      </button>
+    ))}
+  </div>
+);
 }
 
 export default AdminDashboard;

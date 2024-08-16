@@ -61,9 +61,9 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
     
     if result:
         print(result)
-        return result
+        return 'success'
     else: 
-        return result
+        return 'failed'
     
     
 def sql_getAccList(cond):
@@ -130,7 +130,17 @@ def sql_updateAccPassw(usern, o_passw, n_passw):
         else: 
             return "UPD STATEMENT FAILED"
     
-
+def sql_getDptList():
+    q = f"SELECT departmentname FROM departments;"
+    result = sql_sendQuery(q)
+    
+    print("SEDB result is: ")
+    print(result)
+    
+    if result:
+        return result
+    else:
+        return "Department table empty"
 
 
 

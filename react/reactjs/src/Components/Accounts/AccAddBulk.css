@@ -1,35 +1,63 @@
 /* AccAddBulk.css */
 
-/*still not working the text area*/
-.big-textarea {
-    width: 100%; /* Set the width of the textarea to 100% of its container */
-    height: 200px; /* Set the initial height of the textarea */
-    padding: 10px; /* Add padding inside the textarea */
-    font-size: 16px; /* Set the font size of the text inside the textarea */
-    border: 1px solid #ccc; /* Add a border around the textarea */
-    resize: vertical; /* Allow vertical resizing only */
-    box-sizing: border-box; /* Include padding and border in the width and height */
+/* Table styles */
+table {
+  width: 100%; /* Make table full width */
 }
 
+th {
+  text-align: center;
+  padding: 10px;
+}
 
+td {
+  padding: 10px;
+}
+
+/* Label styles (.lbl) */
+.lbl {
+  /* Customize label styles here */
+}
+
+.textfield {
+  width: 100%; /* Make textfield full width of its container (td) */
+  min-height: 200px; /* Set minimum height for the textfield */
+  padding: 10px;
+  font-size: 16px; /* Adjust font size as needed */
+  border: 1px solid #ccc; /* Add a border */
+  border-radius: 4px; /* Add rounded corners */
+  resize: vertical; /* Allow vertical resizing */
+  overflow-y: scroll; /* Enable scrolling for large content */
+}
+
+/* Select element styles (.inp) */
+.inp select {
+  width: 100%; /* Make select element full width */
+  padding: 10px; /* Add padding */
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 4px; /* Add rounded corners */
+}
+
+/* Password input styles */
+.inp input[type="password"] {
+  width: 100%; /* Make password input full width */
+  padding: 10px; /* Add padding */
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 4px; /* Add rounded corners */
+}
+
+/* "Add" button styles */
 .add {
-    padding: 8px 12px; /* Adjust padding for button size */
-    font-size: 20px; /* Set font size */
-    float: right; /* Float the button to the right */
-    background-color: transparent; /* Transparent background */
-    color: #121213; /* Button text color */
-    border: none; /* Remove default button border */
-    border-bottom: 1px solid transparent; /* Initially transparent bottom border */
-    text-decoration: none; /* Remove default text decoration */
-    cursor: pointer; /* Change cursor to pointer on hover */
-    transition: border-color 0.3s ease; /* Smooth transition for border color */
+  background-color: #4CAF50; /* Green color for the button */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.add:hover {
-    border-bottom-color: #007bff; /* Set bottom border color on hover */
-}
+/* Optional styles */
 
-.add:focus,
-.add:active {
-    outline: none; /* Remove outline on focus and active states */
+.textfieldCont {
+  /* Additional styles for the textfield container (td) if needed */
 }

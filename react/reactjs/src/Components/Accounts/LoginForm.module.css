@@ -1,0 +1,68 @@
+/* LoginForm.module.css */
+
+.page {
+  height: 100vh;
+  background-image: url('tempBG.png'); /* Replace with your image path */
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.leftDiv {
+  width: 65%;
+  background-color: transparent;
+}
+
+.rightDiv {
+  background-color: #f0f0f0; /* Lighter shade of white */
+  padding: 20px;
+  border-radius: 10px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Center content vertically */
+  margin: 0 20px; /* Add margin to left and right */
+}
+
+.loginForm {
+  display: flex; /* Make login form container a flex container */
+  flex-direction: column; /* Arrange elements vertically */
+  align-items: center; /* Center elements horizontally */
+  width: 100%; /* Ensure form takes full width of container */
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  text-align: center;
+  padding: 10px;
+}
+
+td {
+  padding: 10px;
+  border: 0px solid black; /* Remove borders */
+}
+
+.lbl {
+  /* Label styles */
+}
+
+.inp {
+  /* Input styles */
+}
+
+.loginBtn {
+  padding: 10px 20px;
+  background-color: #55C;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+}

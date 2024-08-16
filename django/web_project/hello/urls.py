@@ -24,5 +24,5 @@ urlpatterns = [
     path('delAcc/', views.delAcc, name='delAcc'),
     path('updateAcc/', views.updateAcc, name='updateAcc'),
     path('updateAccPassw/', views.updateAccPassw, name='updateAccPassw'),
-    
+    path('getDptList/', views.getDptList, name='getDptList')
 ]

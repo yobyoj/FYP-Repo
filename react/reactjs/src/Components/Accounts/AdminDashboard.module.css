@@ -2,14 +2,15 @@
 
 /* Basic styles */
 
+
 .dashboard {
   padding: 65px 120px;
+  flex: 1; /* Allow dashboard to grow and shrink */
 }
-
 
 .dashboardText {
   font-size: 36px;
-  font-weight:bolder;
+  font-weight: bolder;
   margin-bottom: 20px;
 }
 
@@ -152,4 +153,23 @@
   align-items: center;  
   justify-content: space-between;
   
+}
+
+
+
+.main-container {
+  display: flex; /* Create a flex container for horizontal layout */
+}
+
+.sidebardiv {
+  width: 20%;
+  position: relative; /* Position sidebar relatively */
+}
+
+.sidebar1 {
+  padding: 20px;
+  width: 100%; /* Make sidebar fill the entire width of its container */
+  height: calc(100vh - 65px); /* Adjust height to match dashboard */
+  position: absolute;
+  bottom: 0;
 }

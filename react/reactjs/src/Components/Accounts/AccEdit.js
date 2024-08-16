@@ -1,7 +1,7 @@
 /* login comp*/
 
 import React from 'react';
-import './LoginForm.css';
+
 //import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';

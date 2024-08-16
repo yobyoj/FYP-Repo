@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import './LoginForm.css';
+import styles from './LoginForm.module.css';
 
 const LoginForm2 = () => {
   const [username, setUsername] = useState('');
@@ -92,12 +92,14 @@ const LoginForm2 = () => {
     }
   };
   return (
-    <div className="page">
-      <div className="left-div">
+    <div className={styles.page}>
+    
+      <div className={styles.leftDiv}>
         {/* Left side content if any */}
       </div>
 
-      <div className="LoginForm">
+      <div className={styles.rightDiv}> <div className={styles.loginForm}>
+      
         <form onSubmit={handleLogin}>
           <table>
             <thead>
@@ -107,8 +109,8 @@ const LoginForm2 = () => {
             </thead>
             <tbody>
               <tr>
-                <td className="lbl"> <label htmlFor="username">Username:</label> </td>
-                <td className="inp">
+                <td className={styles.lbl}> <label htmlFor="username">Username:</label> </td>
+                <td className={styles.inp}>
                   <input
                     type="text"
                     id="username"
@@ -119,8 +121,8 @@ const LoginForm2 = () => {
               </tr>
 
               <tr>
-                <td className="lbl"><label htmlFor="password">Password:</label></td>
-                <td className="inp">
+                <td className={styles.lbl}><label htmlFor="password">Password:</label></td>
+                <td className={styles.inp}>
                   <input
                     type="password"
                     id="password"
@@ -130,14 +132,14 @@ const LoginForm2 = () => {
                 </td>
               </tr>
               <tr>
-                <td colSpan="2"><button type="submit">Login</button></td>
+                <td colSpan="2"><button type="submit" className={styles.loginBtn}>Login</button></td>
               </tr>
               <tr>
-                <td colSpan="2"> <Link to="/forgot-password">Forgot Password?</Link> </td>
+                <td colSpan="2"> <Link to="/forgot-password" class={styles.forgotLink}>Forgot Password?</Link> </td>
               </tr>
             </tbody>
           </table>
-        </form>
+        </form></div>
       </div>
     </div>
   );

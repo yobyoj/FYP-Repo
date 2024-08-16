@@ -1,7 +1,7 @@
 /* login comp*/
 
 import React, { useState, useRef } from 'react'; // Only useState needed
-import './LoginForm.css';
+import './LoginForm.module.css';
 //import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';

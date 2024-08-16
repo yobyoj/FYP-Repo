@@ -861,3 +861,60 @@ def updateAccPassw(request):
                 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+@csrf_exempt
+def getDptList(request):
+    if request.method == 'POST':
+        try:
+            print("getDPTLIST STARTED")
+            data = json.loads(request.body)
+
+            result = sql_getDptList() #returns tuplist
+            
+            print("Result returned with: ")
+            print(result)
+            
+            if result:
+                return JsonResponse({'Data': result})
+            else:
+                return JsonResponse({'Data': ['failed']})
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+            
+@csrf_exempt
+def insertAccBulk(request):
+    unsucList = []
+    
+@csrf_exempt
+def insertAccBulk(request):
+    unsucList = []
+    i=0
+    if request.method == 'POST':
+        try:
+            print("insertBulk STARTED")
+            data = json.loads(request.body)
+            usernList = data.get('usernameList', [])
+            passw = data.get('password', '')
+            dpt = data.get('dpt', '')        
+            
+            frstn, lastn = "", ""
+            usert = "voter"
+            
+            for usern in usernList:
+                i=i+1
+                print("LOOPING HHAPPENED THIS MANY TIMES:" + i)
+                insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
+                if insert == 'failed':
+                    unsucList.append(usern)
+            
+            if not unsucList:
+                return JsonResponse({'Result': 'Success'})
+            else:
+                return JsonResponse({'Result': unsucList})
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return JsonResponse({'error': 'An unexpected error occurred'}, status=500)

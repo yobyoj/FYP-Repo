@@ -14,6 +14,7 @@ import LoginForm2 from './Components/Accounts/LoginForm2';
 
 // Import components for SystemAdminApp
 import AccMng from './Components/Accounts/AccMng';
+import AdminApp from './Components/Accounts/AdminApp';
 import AdminDashboard from './Components/Accounts/AdminDashboard';
 import AdminElectionResults from "./Components/Accounts/AdminElectionResults";
 
@@ -55,7 +56,7 @@ function VoterApp() {
 function SystemAdminApp() {
   return (
     <Routes>
-      <Route path='/' element={<AdminDashboard />} />
+      <Route path='/' element={<AdminApp />} />
       <Route path='/AccMng' element={<AccMng />} />
       <Route path='/admin-election-results' element={<AdminElectionResults />} />
     </Routes>
