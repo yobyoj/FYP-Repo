@@ -50,6 +50,13 @@ def sql_validateLogin(usern, passw):
         return 'deny'
         
 def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
+    q = f"SELECT username FROM user_accounts WHERE username = '{usern}'"
+    result = sql_sendQuery(q)
+    
+    if result:
+        return "dup"
+
+
     q = f"INSERT INTO user_accounts (username, password, usertype, firstname, lastname, department) VALUES ('{usern}', '{passw}', '{usert}', '{firstn}', '{lastn}', '{dpt}');"   
     #q="INSERT INTO z_testTable (co1) VALUES ('aaa')"
     
@@ -60,7 +67,6 @@ def sql_insertAcc(usern, passw, usert, firstn, lastn, dpt):
     result = sql_sendQuery(q)
     
     if result:
-        print(result)
         return 'success'
     else: 
         return 'failed'

@@ -17,29 +17,29 @@ function AccAddBulk() {
     const [unsuccessfulList, setUnsuccessfulList] = useState([]);    
 
     const handleAccAdd = async () => {
+        event.preventDefault();
+        
         const usernameList = usernames.split('\n'); // Split usernames into an array
-
-        const body = JSON.stringify({
-          usernameList,
-          password,
-          department: dpt,
-        });
+        
+        console.log(usernameList);
 
         try {
-          const response = await fetch('http://localhost:8000/addAccBulk/', {
+          const response = await fetch('http://127.0.0.1:8000/insertAccBulk/', {
             method: 'POST',
-            body,
+            body: JSON.stringify({ usernList: usernameList, passw: password, dpt: dpt}),
             headers: {
               'Content-Type': 'application/json',
             },
           });
+          
+          //console.log("AWAIT FETCH HAPPENED.")
 
           const data = await response.json();
 
-          if (data.Unsuccessful && data.Unsuccessful.length === 0) {
+          if (data.Result.length === 0) {
             alert('All users successfully inserted');
           } else {
-            setUnsuccessfulList(data.Unsuccessful);
+            setUnsuccessfulList(data.Result);
             let errorMessage = 'This user was not inserted into db: \n';
             errorMessage += unsuccessfulList.join('\n'); // Join unsuccessful usernames for alert
             alert(errorMessage);

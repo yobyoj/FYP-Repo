@@ -817,6 +817,8 @@ def insertAcc(request):
             
             if insert == 'failed':
                 return JsonResponse({'RESULT': 'denied'})
+            elif insert == 'dup':
+                return JsonResponse({'RESULT': 'denied. User already exists.'})
             else:
                 return JsonResponse({'RESULT': 'success'})
         except json.JSONDecodeError:
@@ -917,34 +919,40 @@ def getDptList(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
             
-@csrf_exempt
-def insertAccBulk(request):
-    unsucList = []
     
 @csrf_exempt
 def insertAccBulk(request):
+    print("insertAccBULK STARTED")
     unsucList = []
     i=0
     if request.method == 'POST':
         try:
             print("insertBulk STARTED")
             data = json.loads(request.body)
-            usernList = data.get('usernameList', [])
-            passw = data.get('password', '')
+            usernList = data.get('usernList', [])
+            passw = data.get('passw', '')
             dpt = data.get('dpt', '')        
             
             frstn, lastn = "", ""
             usert = "voter"
             
-            for usern in usernList:
-                i=i+1
-                print("LOOPING HHAPPENED THIS MANY TIMES:" + i)
-                insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
-                if insert == 'failed':
-                    unsucList.append(usern)
+            print("PRINTING USERN LIST")
+            print(usernList)
             
+            for usern in usernList:
+                if usern == "":
+                    unsucList.append("Empty usrname")
+                else:
+                    i=i+1
+                    print(f"LOOPING HHAPPENED THIS MANY TIMES: {i}")
+                    insert = sql_insertAcc(usern, passw, usert, frstn, lastn, dpt)
+                    if insert == 'failed':
+                        unsucList.append(usern)
+                    elif insert == 'dup':
+                        unsucList.append(usern + "already in database")
+            print(f"TOTAL LOOPS IS {i}")
             if not unsucList:
-                return JsonResponse({'Result': 'Success'})
+                return JsonResponse({'Result': unsucList})
             else:
                 return JsonResponse({'Result': unsucList})
                 
