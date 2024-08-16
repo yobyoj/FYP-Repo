@@ -55,8 +55,13 @@ tr .login{
   background-color: transparent;
 }
 
+.loginForgot{
+  margin: 10px 
+}
+
 .lbl {
-  /* Label styles */
+  text-align: left;
+  
 }
 
 .inp {
@@ -70,5 +75,10 @@ tr .login{
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin: 10px;
+}
 
+label { 
+  text-align: left;
+  font-size: 20px;
 }

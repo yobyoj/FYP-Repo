@@ -100,16 +100,16 @@ const LoginForm2 = () => {
 
       <div className={styles.rightDiv}> <div className={styles.loginForm}>
       
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} className = {styles.login}>
           <table className = {styles.login}>
             <thead className = {styles.login}>
               <tr className = {styles.login}>
                 <th className = {styles.login} colSpan="2"><h1>Login</h1></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className = {styles.login}>
               <tr className = {styles.login}>
-                <td className={styles.lbl} className = {styles.login}> <label htmlFor="username">Username:</label> </td>
+                <td className={styles.lbl} className = {styles.login}> <label htmlFor="username" className = {styles.login}>Username:</label> </td>
                 <td className={styles.inp} className = {styles.login}>
                   <input
                     type="text"
@@ -132,7 +132,7 @@ const LoginForm2 = () => {
                 </td>
               </tr>
               <tr className = {styles.login}>
-                <td className = {styles.login} colSpan="2"><button type="submit" className={styles.loginBtn}>Login</button></td>
+                <td className = {styles.login} colSpan="2"><button type="submit" className={styles.loginBtn} >Login</button></td>
               </tr>
               <tr>
                 <td className = {styles.login} colSpan="2"> <Link to="/forgot-password" class={styles.forgotLink}>Forgot Password?</Link> </td>
