@@ -135,7 +135,7 @@ const LoginForm2 = () => {
                 <td className = {styles.login} colSpan="2"><button type="submit" className={styles.loginBtn} >Login</button></td>
               </tr>
               <tr>
-                <td className = {styles.login} colSpan="2"> <Link to="/forgot-password" class={styles.forgotLink}>Forgot Password?</Link> </td>
+                <td className = {styles.login} colSpan="2"> <Link to="/forgot-password" className={styles.forgotLink}>Forgot Password?</Link> </td>
               </tr>
             </tbody>
           </table>

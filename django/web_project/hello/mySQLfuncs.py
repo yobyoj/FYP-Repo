@@ -29,7 +29,7 @@ def sql_sendQuery(q):
         return result
         
     except pymysql.Error as e:
-        #print("Error:", e)
+        print("Error:", e)
     finally:
         cursor.close()
         connection.close()

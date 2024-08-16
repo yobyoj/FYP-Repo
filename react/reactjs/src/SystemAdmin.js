@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ElectionManagerDashboard from "./Components/ElectionManager/Dashboard";
-import ElectionManagerElectionDetails from './Components/ElectionManager/ElectionDetails';
-import ElectionManagerCandidateProfiles from "./Components/ElectionManager/Candidate Profiles/CandidateProfiles";
-import ElectionManagerListOfVoters from "./Components/ElectionManager/List Of Voters/ListOfVoters";
-import Summary1 from "./Components/ElectionManager/Summary/SummaryPage1";
-import Summary2 from "./Components/ElectionManager/Summary/SummaryPage2";
-import Summary3 from "./Components/ElectionManager/Summary/SummaryPage3";
+import ElectionManagerElectionDetails from './Components/Accounts/dashboard/ElectionDetails';
+import ElectionManagerCandidateProfiles from "./Components/Accounts/dashboard/Candidate Profiles/CandidateProfiles";
+import ElectionManagerListOfVoters from "./Components/Accounts/dashboard/List Of Voters/ListOfVoters";
+import Summary1 from "./Components/Accounts/dashboard/Summary/SummaryPage1";
+import Summary2 from "./Components/Accounts/dashboard/Summary/SummaryPage2";
+import Summary3 from "./Components/Accounts/dashboard/Summary/SummaryPage3";
 
-import OngoingElectionSummary from "./Components/ElectionManager/Dashboard Elements/Ongoing/OngoingElectionSummary";
-import OngoingElectionSummary2 from "./Components/ElectionManager/Dashboard Elements/Ongoing/OngoingElectionSummary2";
-import OngoingElectionSummary3 from "./Components/ElectionManager/Dashboard Elements/Ongoing/OngoingElectionSummary3";
+import OngoingElectionSummary from "./Components/Accounts/dashboard/Dashboard Elements/Ongoing/OngoingElectionSummary";
+import OngoingElectionSummary2 from "./Components/Accounts/dashboard/Dashboard Elements/Ongoing/OngoingElectionSummary2";
+import OngoingElectionSummary3 from "./Components/Accounts/dashboard/Dashboard Elements/Ongoing/OngoingElectionSummary3";
 
 import ScheduledElectionSummary from "./Components/Accounts/dashboard/Dashboard Elements/Scheduled/ScheduledElectionSummary";
 import ScheduledElectionSummary2 from "./Components/Accounts/dashboard/Dashboard Elements/Scheduled/ScheduledElectionSummary2";
 import ScheduledElectionSummary3 from "./Components/Accounts/dashboard/Dashboard Elements/Scheduled/ScheduledElectionSummary3";
 
-import CompletedElections from "./Components/ElectionManager/CompletedElections";
-import ArchivedElections from "./Components/ElectionManager/ArchivedElections";
-import ElectionManagerElectionTopics from './Components/ElectionManager/Election Topics/ElectionTopics';
+import CompletedElections from "./Components/Accounts/dashboard/CompletedElections";
+import ArchivedElections from "./Components/Accounts/dashboard/ArchivedElections";
+import ElectionManagerElectionTopics from './Components/Accounts/dashboard/Election Topics/ElectionTopics';
 
 import AdminDashboard from "./Components/Accounts/AdminDashboard";
 import AccMng from "./Components/Accounts/AccMng";

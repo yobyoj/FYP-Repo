@@ -1,5 +1,5 @@
 import React from "react";
-import Header from '../../Header';
+import Header from '../../../Header';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -13,7 +13,7 @@ function OngoingElectionSummary2() {
     const [searchBar, setSearchBar] = useState("");
 
     const handleNavigate = () =>{
-        navigate('/election-manager/ongoing-election-summary3', { state: { election } });
+        navigate('/system-admin/ongoing-election-summary3', { state: { election } });
     }
 
     const handleSearch = () => {

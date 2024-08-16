@@ -86,14 +86,18 @@ function AccAdd() {
   
   return (
     <div className="addForm">
-      <form onSubmit={handleAccAdd}>
-        <thead>
+    <h1>Add account</h1>
+    {/*
+      <thead>
           <tr>
             <th colSpan="2">
               <h1>Add account</h1>
             </th>
           </tr>
-        </thead>
+      </thead>
+      */}
+      <form onSubmit={handleAccAdd}>
+        
         <table className="table">
           <tbody>
             <tr>

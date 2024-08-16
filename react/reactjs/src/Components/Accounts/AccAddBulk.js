@@ -93,9 +93,13 @@ function AccAddBulk() {
     <>
         <h1> Bulk Add Accounts</h1>
         <form onSubmit={handleAccAdd}>
+                    
+                    
                     <table>
+                        {/*
                         <thead>
                         </thead>
+                        */}
                         <tbody>
                             <tr>
                                 <td className="lbl"> <label htmlFor="username">Username:</label> </td>

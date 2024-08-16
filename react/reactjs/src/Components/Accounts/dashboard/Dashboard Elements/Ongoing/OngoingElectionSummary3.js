@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import Header from '../../Header';
+import Header from '../../../Header';
 import { useNavigate } from "react-router-dom";
 
 function OngoingElectionSummary3() {    
     const navigate = useNavigate();
 
     const handleNavigate = () =>{
-        navigate('/election-manager/');
+        navigate('/system-admin/');
     }
 
     return (

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify'; // Import DOMPurify for sanitization
 import './ElectionDetails.css';
-import Header from './Header';
+import Header from '../Header';
 import Sidebar from './Sidebar';
 
 function ElectionManagerElectionDetails({ formData, updateFormData }) {
