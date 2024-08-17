@@ -69,7 +69,6 @@ function ArchivedElections() {
                             <button
                                 key={election.archived_election_id}  // Ensure this key is unique
                                 className="election-item"
-                                onClick={() => navigate(`/election-manager/${election.status}-election`, { state: { election } })}
                             >
                                 <div>{election.title}</div>
                                 <div>{election.timezone}</div>

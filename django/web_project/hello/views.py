@@ -624,6 +624,10 @@ def update_election_statuses():
     # Step 1: Update the status of all elections
     elections = Election.objects.all()
     for election in elections:
+        # Skip the election if it is already archived
+        if election.status == 'Archived':
+            continue
+
         if election.startDate > now:
             election.status = 'Scheduled'
         elif election.startDate <= now <= election.endDate:
@@ -674,12 +678,11 @@ def update_election_statuses():
                         tally=actual_value  # Set the tally based on the retrieved encrypted_tally
                     )
                     
-            
             # Step 4: Delete the election from the OngoingElection table
             OngoingElection.objects.filter(id=election.id).delete()
 
-
     print('Elections have been updated')
+
     
     
 @csrf_exempt
