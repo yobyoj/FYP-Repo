@@ -84,20 +84,23 @@ def sql_getAccList(cond):
     else: 
         return []
 
-def sql_delAcc(usern):
-    #print(f"ATTEMPTING ACC DELETING. USERNAME IS {usern}")
-    q = f"DELETE FROM user_accounts WHERE username = '{usern}'"
-    
-    #print("QUERY STATEMENT IS:  "+q)
+def sql_delAcc(uid):
+    q = f"DELETE FROM user_accounts WHERE userid = '{uid}'"
     r = sql_sendQuery(q)
     
-    q = f"SELECT username FROM user_accounts WHERE username = '{usern}';"
+    q= f"DELETE FROM election_voter_status WHERE userid = {uid};"
+    r = sql_sendQuery(q)
+    
+    q = f"SELECT username FROM user_accounts WHERE userid = '{uid}';"
     result = sql_sendQuery(q)
-        
+    
     if not result:
         return True
     else: 
         return False
+
+
+
         
 def sql_updateAcc(usern, usert, frstn, lastn, dpt):
     #print(f"Username is {usern}")

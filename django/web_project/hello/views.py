@@ -848,11 +848,11 @@ def delAcc(request):
         try:
             # Access JSON data from request body
             data = json.loads(request.body)
-            usern = data.get('username')
+            uid = data.get('uid')
             
             #print(f"ACC DEL REQUEST RECIEVED. ATTEMPTING DELETION. USERNAME IS {usern}")
             
-            result = sql_delAcc(usern)
+            result = sql_delAcc(uid)
             
             if result == False:
                 return JsonResponse({'RESULT': 'db side error'})                    
