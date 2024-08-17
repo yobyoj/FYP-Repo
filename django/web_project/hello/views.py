@@ -19,6 +19,9 @@ from Crypto.Hash import SHA256
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 import logging
+from rest_framework.views import APIView
+from rest_framework.response import Response  # Import Response for returning responses
+from rest_framework import generics  # Import generics for ListAPIView
 
 from .models import Election, UserAccount, ElectionVoterStatus, Department, OngoingElection, EncryptedTally, CompletedElection, ArchivedElection
 #from hello.mySQLfuncs import sql_validateLogin, sql_insertAcc, get_ongoing_user_elections_with_status, update_election_voter_status, retrieve_completed_election_tally
@@ -618,6 +621,11 @@ def find_voted_subject_by_uuid_and_increment_vote(electionid, uuid):
 ###################################delete once the cron jobs is up
 from django.utils import timezone
 
+class UpdateElectionStatuses(APIView):
+    def post(self, request, *args, **kwargs):
+        update_election_statuses()
+        return Response({'status': 'Election statuses updated successfully'})
+    
 def update_election_statuses():
     now = timezone.now()
     

@@ -14,6 +14,7 @@ function ElectionManagerDashboard() {
     const [completedSearchBar, setCompletedSearchBar] = useState("");
 
     useEffect(() => {
+      updateElectionStatuses();
       fetchElections();
     }, []);
 
@@ -37,7 +38,17 @@ function ElectionManagerDashboard() {
        // console.log('Fetched data:', response.data);
         setElections(response.data);
       } catch (error) {
-        console.error('Error fetching election data:', error);
+        console.error('Error fetching election data:',  error);
+      }
+    };
+
+    const updateElectionStatuses = async () => {
+      try {
+          console.log('Updating election statuses...');
+          const response = await axios.post('http://127.0.0.1:8000/api/update-election-statuses/');
+          console.log('Election statuses updated:', response.data);
+      } catch (error) {
+          console.error('Error updating election statuses:', error);
       }
     };
 
