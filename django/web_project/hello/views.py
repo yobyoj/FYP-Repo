@@ -848,7 +848,7 @@ def delAcc(request):
         try:
             # Access JSON data from request body
             data = json.loads(request.body)
-            uid = data.get('uid')
+            uid = data.get('userid')
             
             #print(f"ACC DEL REQUEST RECIEVED. ATTEMPTING DELETION. USERNAME IS {usern}")
             

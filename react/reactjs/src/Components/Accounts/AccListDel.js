@@ -23,12 +23,12 @@ const GetAccList = async (cond) => {
 };
 
 
-const DeleteAccount = async (usern) => {
+const DeleteAccount = async (userid) => {
   try {
     //console.log("SENDING ACC DEL RESPONCE TO BACKEND. USERNAME IS ", usern)
     const response = await fetch('http://localhost:8000/delAcc/', {
       method: 'POST',
-      body: JSON.stringify({ username: usern }),
+      body: JSON.stringify({ userid: userid }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -76,13 +76,13 @@ function AccListDel() {
     )}
   </tr>
   );
-  const handleDelete = async (username) => {
+  const handleDelete = async (userid) => {
     const confirmed = window.confirm('Are you sure you want to delete this account?');
     if (confirmed) {
-      const success = await DeleteAccount(username);
+      const success = await DeleteAccount(userid);
       if (success) {
         alert('Account successfully deleted.');
-        setData(data.filter((item) => item[0] !== username)); // Remove the deleted item from the state
+        setData(data.filter((item) => item[0] !== userid)); // Remove the deleted item from the state
         setCond("")
       } else {
         alert('Failed to delete account.');
